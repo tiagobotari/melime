@@ -8,9 +8,9 @@ manifold of the real data distribution.
 
 ```
 src:
-	lime: 				# copy of original lime implementation
+	lime: 			# copy of original lime implementation
 	density-lime: 		# Extensions and modifications of lime implementations
-	playground:			# Various example files.
+	playground:		# Various example files.
 ```
 
 
