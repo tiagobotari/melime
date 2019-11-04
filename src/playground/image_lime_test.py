@@ -12,7 +12,9 @@ from torch.autograd import Variable
 
 from torchvision import models, transforms
 
-from lime import lime_image
+# from lime import lime_image
+
+from density_lime import lime_image
 from skimage.segmentation import mark_boundaries
 
 def get_image(path):
@@ -97,7 +99,7 @@ def batch_predict(images):
 
 
 
-explainer = lime_image.LimeImageExplainer()
+explainer = lime_image.DensityImageExplanation(None)
 explanation = explainer.explain_instance(np.array(pill_transf(img)),
                                          batch_predict, # classification function
                                          top_labels=5,
@@ -107,3 +109,4 @@ explanation = explainer.explain_instance(np.array(pill_transf(img)),
 temp, mask = explanation.get_image_and_mask(explanation.top_labels[0], positive_only=True, num_features=5, hide_rest=False)
 img_boundry1 = mark_boundaries(temp/255.0, mask)
 plt.imshow(img_boundry1)
+plt.show()
