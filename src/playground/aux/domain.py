@@ -1,21 +1,26 @@
 import numpy as np
+from matplotlib import pyplot as plt
 
 
 class Spiral(object):
-    def __init__(self, r_a=1, r_b=0, error_x=None, error_y=None):
+    def __init__(self, r_a=1, r_b=0, error_x=None, error_y=None, n_samples=40000, theta_domain=None):
         self.r_a = r_a
         self.r_b = r_b
+        self.feature_names = ['x1', 'x2']
         self.error_x = error_x
         self.error_y = error_y
+        self.data, self.target = self.domain(theta_domain=theta_domain, n_samples=n_samples)
 
-    def domain(self, data_size=80000, seed=1654654):
+    def domain(self, n_samples=40000, seed=1654654, theta_domain=None):
+        if theta_domain is None:
+            theta_domain = [0, 8 * np.pi]
         # seed = 2154456
         random_state = np.random.RandomState(seed)
         # distribution = np.random.rand(data_size)
-        distribution = random_state.rand(data_size)
+        distribution = random_state.rand(n_samples)
         # distribution = random_state.exponential(0.5, data_size)[::-1]
         # theta = np.arange(0, 8 * np.pi, 0.01)
-        theta = distribution*(8*np.pi) # + 2*np.pi
+        theta = distribution*(theta_domain[1]) + theta_domain[0]
         # theta1 = distribution + 4.35*np.pi
         # theta = np.append(theta, theta1)
 
@@ -59,6 +64,14 @@ class Spiral(object):
         distribution = (random_state.rand(data_size) - 0.5) * 1.0
         theta = distribution+theta_0
         return self.f(theta)
+
+    def plot(self):
+        fig, ax = plt.subplots()
+        ax.scatter(self.data[:, 0], self.data[:, 1], c=self.target)
+        ax.set_xlabel(self.feature_names[0])
+        ax.set_ylabel(self.feature_names[1])
+        return fig, ax
+
 
 class SimpleSpiral(object):
     def __init__(self, r_a=1, r_b=0, error_x=0.2, error_y=None):
