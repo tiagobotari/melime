@@ -12,9 +12,8 @@ from torch.autograd import Variable
 
 from torchvision import models, transforms
 
-# from lime import lime_image
-
 from density_lime import lime_image
+from density_lime.gan_density import GANDensity
 from skimage.segmentation import mark_boundaries
 
 def get_image(path):
@@ -31,9 +30,9 @@ def get_input_transform():
         transforms.Resize((256, 256)),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
+        # lambda x: x / 255.,
         normalize
     ])
-
     return transf
 
 def get_input_tensors(img):
@@ -44,7 +43,7 @@ def get_input_tensors(img):
 def get_pil_transform():
     transf = transforms.Compose([
         transforms.Resize((256, 256)),
-        transforms.CenterCrop(224)
+        transforms.CenterCrop(224),
     ])
 
     return transf
@@ -67,22 +66,28 @@ preprocess_transform = get_preprocess_transform()
 # # # # # # # # # # Imagenet class indexes
 idx2label, cls2label, cls2idx = [], {}, {}
 with open(os.path.abspath('./data/imagenet_class_index.json'), 'r') as read_file:
-    class_idx = json.load(read_file)
-    idx2label = [class_idx[str(k)][1] for k in range(len(class_idx))]
-    cls2label = {class_idx[str(k)][0]: class_idx[str(k)][1] for k in range(len(class_idx))}
-    cls2idx = {class_idx[str(k)][0]: k for k in range(len(class_idx))}
+    class_idx   = json.load(read_file)
+    idx2label   = [class_idx[str(k)][1] for k in range(len(class_idx))]
+    cls2label   = {class_idx[str(k)][0]: class_idx[str(k)][1] for k in range(len(class_idx))}
+    cls2idx     = {class_idx[str(k)][0]: k for k in range(len(class_idx))}
 # # # # # # # # # #
 
 # Prepare model
-model = models.inception_v3(pretrained=True)
+model = models.resnet101(pretrained=True)
 model.eval()
 
 # Prepare input
-img = get_image('./data/dogs.png')
+if len(sys.argv) > 1:
+    img_src = './data/%s.jpg' % sys.argv[1]
+else:
+    img_src = './data/dogs.png'
+
+img = get_image(img_src)
 img_t = get_input_tensors(img)
 
 # Predict
-logits = model(img_t)
+pred = torch.argmax(model(img_t)).item()
+print("max logit: ", pred, "Class: ", idx2label[pred])
 
 # Predictor function for explanation generations
 def batch_predict(images):
@@ -97,9 +102,9 @@ def batch_predict(images):
     probs = F.softmax(logits, dim=1)
     return probs.detach().cpu().numpy()
 
-
-
-explainer = lime_image.DensityImageExplanation(None)
+density = GANDensity()
+# density = None
+explainer = lime_image.DensityImageExplainer(density)
 explanation = explainer.explain_instance(np.array(pill_transf(img)),
                                          batch_predict, # classification function
                                          top_labels=5,
@@ -109,4 +114,5 @@ explanation = explainer.explain_instance(np.array(pill_transf(img)),
 temp, mask = explanation.get_image_and_mask(explanation.top_labels[0], positive_only=True, num_features=5, hide_rest=False)
 img_boundry1 = mark_boundaries(temp/255.0, mask)
 plt.imshow(img_boundry1)
-plt.show()
+plt.savefig('plot.pdf')
+# plt.show()
