@@ -55,6 +55,9 @@ def store_fill(img, fill, mask, i):
     plt.close(fig)
 
 
+################################################################################# 
+# Actual implementation of GAN density                                          #
+#################################################################################
 class GANDensity:
     def fill(self, image, segments):
         # TODO fix config loading
