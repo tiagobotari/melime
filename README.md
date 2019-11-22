@@ -25,4 +25,17 @@ src:
 	external_modules: 	# Directory for git submodules.
 ```
 
+## Running Examples
+
+In the `src/playground/` directory there is a couple of examples. One of these examples
+is the `image_lime_test.py`, which will generate a plot like the one found in the 
+`src/playground/plots` directory. To run the script, run the following command when
+being located in the `src/playground` directory:
+
+```bash
+> python image_lime_test -i car train surf toilet
+```
+
+The `car`, `train`, `surf`, and `toilet` argument refers to png images located in the
+`src/playground/data` directory.
 
