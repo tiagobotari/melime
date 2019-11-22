@@ -1,0 +1,3 @@
+[submodule "src/external_modules/generative-inpainting-pytorch"]
+	path = src/external_modules/generative-inpainting-pytorch
+	url = https://github.com/DAA233/generative-inpainting-pytorch.git
