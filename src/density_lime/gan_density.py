@@ -1,14 +1,19 @@
 import sys
-sys.path.append('../../../generative-inpainting-pytorch')
-
 import matplotlib.pyplot as plt
-
-from trainer import Trainer
-from utils.tools import get_config
-
 import torch
 import numpy as np
 
+# # # # # # LOAD GAN CODE # # # # # # # # #
+# TODO make proper load of module
+sys.path.append('../../../generative-inpainting-pytorch')
+from trainer import Trainer
+from utils.tools import get_config
+# # # # # # DONE LOADING  # # # # # # # # #
+
+
+""" 
+    Small helperfunctions to simplify other parts of the code
+"""
 def load_weights(path, device):
     model_weights = torch.load(path)
     return {
@@ -22,9 +27,9 @@ normalize   = lambda x: np.clip((x - x.min()) / x.max() * 255, 0, 255).astype(np
 
 def store_fill(img, fill, mask, i):
     """
-        Simple function for storing fills. Most for debugging and assessment of the method.
+        Simple function for storing/plotting fills. 
+        Most for debugging and assessment of the method.
     """
-
 
     img     = to_np(img)
     fill    = to_np(fill)
@@ -53,6 +58,7 @@ def store_fill(img, fill, mask, i):
 
 class GANDensity:
     def fill(self, image, segments):
+        # TODO fix config loading
         config = get_config('../../../generative-inpainting-pytorch/configs/config.yaml')
         if config['cuda']:
             device = torch.device("cuda:{}".format(config['gpu_ids'][0]))
@@ -63,23 +69,23 @@ class GANDensity:
         trainer.load_state_dict(load_weights('../../../generative-inpainting-pytorch/torch_model.p', device), strict=False)
         trainer.eval()
 
-        img = torch.tensor(image, device=device).float()
-        img = img.permute(2, 0, 1)                        
-
-        fill = torch.zeros(img.size(), device=device)      
+        img     = torch.tensor(image, device=device).float()
+        img     = img.permute(2, 0, 1)                        
+        fill    = torch.zeros(img.size(), device=device)      
 
         for seg in range(segments.max()):
-            sel = torch.tensor(segments, device=device) == seg
+            sel         = torch.tensor(segments, device=device) == seg
 
-            mask = torch.zeros(segments.shape, device=device).float().unsqueeze(0) 
+            mask        = torch.zeros(segments.shape, device=device).float().unsqueeze(0) 
             mask[:,sel] = 1.
-            mask = mask.unsqueeze(0)
+            mask        = mask.unsqueeze(0)
 
-            x = ( (img / 127.5 - 1) * (1 - mask) ) 
+            x           = ( (img / 127.5 - 1) * (1 - mask) ) 
 
             with torch.no_grad():
                 _, res, _ = trainer.netG(x, mask)
                 # store_fill(x.squeeze().permute(1, 2, 0), res.squeeze().permute(1, 2, 0), mask, seg)
+
             fill[:, sel] = res[0,:, sel]
 
         fill = fill.permute(1, 2, 0).cpu().detach().numpy()
