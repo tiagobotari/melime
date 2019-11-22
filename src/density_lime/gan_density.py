@@ -5,11 +5,10 @@ import numpy as np
 
 # # # # # # LOAD GAN CODE # # # # # # # # #
 # TODO make proper load of module
-sys.path.append('../../../generative-inpainting-pytorch')
-from trainer import Trainer
+sys.path.append('../external_modules/inpainting')
+from trainer import Trainer # /generative-inpainting-pytorch'
 from utils.tools import get_config
 # # # # # # DONE LOADING  # # # # # # # # #
-
 
 """ 
     Small helperfunctions to simplify other parts of the code
@@ -59,14 +58,14 @@ def store_fill(img, fill, mask, i):
 class GANDensity:
     def fill(self, image, segments):
         # TODO fix config loading
-        config = get_config('../../../generative-inpainting-pytorch/configs/config.yaml')
+        config = get_config('../external_modules/inpainting/configs/config.yaml')
         if config['cuda']:
             device = torch.device("cuda:{}".format(config['gpu_ids'][0]))
         else:
             device = torch.device("cpu")
 
         trainer = Trainer(config)
-        trainer.load_state_dict(load_weights('../../../generative-inpainting-pytorch/torch_model.p', device), strict=False)
+        trainer.load_state_dict(load_weights('../../pretrained_models/torch_contextual_attention_model.p', device), strict=False)
         trainer.eval()
 
         img     = torch.tensor(image, device=device).float()
