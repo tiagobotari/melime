@@ -11,6 +11,52 @@ import sklearn
 from skimage.color import gray2rgb
 from progressbar import ProgressBar
 
+class DensityImageExplanation(ImageExplanation):
+    def get_image_and_mask(self, label, positive_only=True, negative_only=False, hide_rest=False,
+                           num_features=5, min_weight=0.):
+        """
+            Simple extention of `lime.lime_image.ImageExplanation`, which allows for another
+            background color than black when `hide_rest` is True.
+            Just copied the file from the LIME implementation. See comment, where we did something
+            extra.
+        """
+        if label not in self.local_exp:
+            raise KeyError('Label not in explanation')
+        if positive_only & negative_only:
+            raise ValueError("Positive_only and negative_only cannot be true at the same time.")
+        segments = self.segments
+        image = self.image
+        exp = self.local_exp[label]
+        mask = np.zeros(segments.shape, segments.dtype)
+        if hide_rest:
+            temp = np.zeros(self.image.shape)
+            # FHV adding minimal extra functionality to fix color
+            if isinstance(hide_rest, int):
+                temp += hide_rest
+            # FHV end edit
+        else:
+            temp = self.image.copy()
+        if positive_only:
+            fs = [x[0] for x in exp
+                  if x[1] > 0 and x[1] > min_weight][:num_features]
+        if negative_only:
+            fs = [x[0] for x in exp
+                  if x[1] < 0 and abs(x[1]) > min_weight][:num_features]
+        if positive_only or negative_only:
+            for f in fs:
+                temp[segments == f] = image[segments == f].copy()
+                mask[segments == f] = 1
+            return temp, mask
+        else:
+            for f, w in exp[:num_features]:
+                if np.abs(w) < min_weight:
+                    continue
+                c = 0 if w < 0 else 1
+                mask[segments == f] = -1 if w < 0 else 1
+                temp[segments == f] = image[segments == f].copy()
+                temp[segments == f, c] = np.max(image)
+            return temp, mask
+
 
 class DensityImageExplainer(LimeImageExplainer):
     def __init__(self, density, *args, **kwargs):
@@ -128,7 +174,7 @@ class DensityImageExplainer(LimeImageExplainer):
             metric=distance_metric
         ).ravel()
 
-        ret_exp = ImageExplanation(image, segments)
+        ret_exp = DensityImageExplanation(image, segments)
 
         if top_labels:
             top = np.argsort(labels[0])[-top_labels:]
