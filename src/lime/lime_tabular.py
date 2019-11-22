@@ -235,6 +235,11 @@ class LimeTabularExplainer(object):
                 discretized_training_data = self.discretizer.discretize(
                     training_data)
 
+        # TODO: TB: It may starts here. Ok, here we have a problem,
+        # TODO: This routine do not accept sample, only accept a kernel.
+        # TODO: Two possible options: (1) change lime, or
+        # TODO: (2) create a kernel function from KernelDensityExp.
+
         if kernel_width is None:
             kernel_width = np.sqrt(training_data.shape[1]) * .75
         kernel_width = float(kernel_width)
