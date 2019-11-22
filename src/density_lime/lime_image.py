@@ -12,7 +12,7 @@ from skimage.color import gray2rgb
 from progressbar import ProgressBar
 
 
-class DensityImageExplanation(LimeImageExplainer):
+class DensityImageExplainer(LimeImageExplainer):
     def __init__(self, density, *args, **kwargs):
         """
         Init function  
@@ -22,7 +22,7 @@ class DensityImageExplanation(LimeImageExplainer):
                 could be the function `data_labels` originally used in the 
                 LimeImageExplainer.
         """
-        super(DensityImageExplanation, self).__init__(*args, **kwargs)
+        super(DensityImageExplainer, self).__init__(*args, **kwargs)
         self.density = density
 
 
@@ -38,17 +38,21 @@ class DensityImageExplanation(LimeImageExplainer):
         return segments
 
 
-    # TODO fill with density somehow
     def fill(self, image, segments, hide_color=None):
         fill = image.copy()
-        if hide_color is None:
+        if self.density is not None:
+            fill = self.density.fill(image, segments)
+
+        elif hide_color is None:
             for x in np.unique(segments):
                 fill[segments == x] = (
                     np.mean(image[segments == x][:, 0]),
                     np.mean(image[segments == x][:, 1]),
                     np.mean(image[segments == x][:, 2]))
+
         else:
             fill[:] = hide_color
+
         return fill
 
 
