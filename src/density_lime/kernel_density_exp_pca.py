@@ -1,20 +1,9 @@
-from functools import partial
-import numpy as np
 
-from scipy.special import gammainc
-from scipy.stats import multivariate_normal
-
-from sklearn.neighbors.ball_tree import BallTree, DTYPE
-from  sklearn.neighbors.kd_tree import KDTree
 from sklearn.decomposition import IncrementalPCA, KernelPCA
 from sklearn.manifold import Isomap
-from sklearn.neighbors.kde import KernelDensity
-from sklearn.utils.extmath import row_norms
-from sklearn.utils import check_array, check_random_state, check_consistent_length
-
-from matplotlib import pyplot as plt
 
 from density_lime.kernel_density_exp import KernelDensityExp
+
 
 # TODO: Implement Kernel PCA?
 #  Probabilistic PCA? MiniBatchDictionaryLearning? MiniBatchSparsePCA? LinearDiscriminantAnalysis?
@@ -26,6 +15,7 @@ class KernelDensityExpPCA(object):
         self.pca = IncrementalPCA(n_components=n_components)
         self.bandwidth = bandwidth
         self.kernel = kernel
+        self.manifold = None
 
     def fit(self, x):
         x_pca = self.pca.fit_transform(x)
@@ -53,6 +43,7 @@ class KernelDensityExpKernelPCA(object):
         self.pca = KernelPCA(n_components=n_components, kernel='rbf', fit_inverse_transform=True)
         self.bandwidth = bandwidth
         self.kernel = kernel
+        self.manifold = None
 
     def fit(self, x):
         x_pca = self.pca.fit_transform(x)
@@ -95,10 +86,10 @@ class KernelDensityExpIsomap(object):
         x_exp_pca = self.transformer.transform(x_exp)
         x_sample_pca = self.manifold.sample_radius(
             x_exp_pca, n_min_kernels=n_min_kernels, r=r, n_samples=n_samples, random_state=random_state)
-        x_sample = self.pca.inverse_transform(x_sample_pca)
+        x_sample = self.transformer.inverse_transform(x_sample_pca)
         return x_sample
 
     def sample(self, n_samples=1, random_state=None):
         x_sample_pca = self.manifold.sample(n_samples=n_samples, random_state=random_state)
-        x_sample = self.pca.inverse_transform(x_sample_pca)
+        x_sample = self.transformer.inverse_transform(x_sample_pca)
         return x_sample

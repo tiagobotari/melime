@@ -2,15 +2,10 @@ from functools import partial
 import numpy as np
 
 from scipy.special import gammainc
-from scipy.stats import multivariate_normal
 
-from sklearn.neighbors.ball_tree import BallTree, DTYPE
-from  sklearn.neighbors.kd_tree import KDTree
 from sklearn.neighbors.kde import KernelDensity
 from sklearn.utils.extmath import row_norms
 from sklearn.utils import check_array, check_random_state, check_consistent_length
-
-from matplotlib import pyplot as plt
 
 
 def gaussian(x, kernel_width):
