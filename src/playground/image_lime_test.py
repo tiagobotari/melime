@@ -13,8 +13,11 @@ from torch.autograd import Variable
 
 from torchvision import models, transforms
 
-from density_lime import lime_image
-from density_lime.gan_density import GANDensity
+from density_lime.lime_image import DensityImageExplainer
+from density_lime.densities import *
+# from density_lime.gan_density import GANDensity
+# from density_lime.gaussian_blur_density import GaussianBlurDensity
+
 from skimage.segmentation import mark_boundaries
 
 # # # # # # # # # # Imagenet class indexes  - Not used that much currently but might be important later.
@@ -103,11 +106,17 @@ def main(args):
     model.to(device)
     model.eval()
 
-    mean_explainer = lime_image.DensityImageExplainer(None)
-    density = GANDensity()
-    gan_explainer = lime_image.DensityImageExplainer(density)
+    explainers = [
+            # Simple explainers
+            ("Mean",    DensityImageExplainer( MeanDensity())                   ), 
+            ("Blur",   DensityImageExplainer( NoiseDensity(sigma=0.2))         ), 
+            ("Random",   DensityImageExplainer( GaussianBlurDensity(radius=10))  ), 
 
-    explainers = [("Mean", mean_explainer), ("GAN", gan_explainer)]
+            # Generative
+            ("Local",   DensityImageExplainer( LocalDensity())                  ), 
+            # TODO ("VAE", DensityImageExplainer( VAEDensity() ),
+            ("GAN",     DensityImageExplainer( GANDensity())                    ),
+        ]
 
     # Prepare prediction function for explainer to use to get labels
     def batch_predict(images):
@@ -130,7 +139,7 @@ def main(args):
 
     idx2label, *_ = imagenet_indexes()
 
-    fig, ax = plt.subplots(max(2, len(names)), 1 + len(explainers), figsize=(9, 3 * len(names)))
+    fig, ax = plt.subplots(max(2, len(names)), 1 + 2 * len(explainers), figsize=(1+2*len(explainers), 1 * len(names)))
     for i, (name, img, img_t) in enumerate(zip(names, images, images_t)):
 
         # Predict
@@ -149,22 +158,22 @@ def main(args):
 
         # Create explanations and plot them.
         for j, (ex_name, explainer) in enumerate(explainers): 
-            explanation = explainer.explain_instance(np_img,
+            explanation, fill = explainer.explain_instance(np_img,
                                                      batch_predict, # classification function
                                                      top_labels=5,
                                                      hide_color=None,
                                                      num_samples=1000) # number of images that will be sent to classification function
 
             temp, mask  = explanation.get_image_and_mask(explanation.top_labels[0], positive_only=True, num_features=5, hide_rest=255)
-            boundary    = mark_boundaries(temp/255.0, mask)
+            ax[i, 2*j+1].imshow(fill.astype(np.uint8))
+            ax[i, 2*j+2].imshow(temp.astype(np.uint8))
 
-            print(ex_name, temp.dtype, temp.min(), temp.max(), temp.shape)
-            
-            ax[i, j+1].imshow(temp.astype(np.uint8))
-            remove_axis(ax[i, j+1])
+            remove_axis(ax[i, 2*j+1])
+            remove_axis(ax[i, 2*j+2])
 
             if i == 0: 
-                ax[i, j+1].set_title(ex_name)
+                ax[i, 2*j+1].set_title(ex_name + " (f)")
+                ax[i, 2*j+2].set_title(ex_name)
 
     fig.tight_layout()
     fig.savefig("plots/GAN_explanations_%s.pdf" % "_".join(names))
