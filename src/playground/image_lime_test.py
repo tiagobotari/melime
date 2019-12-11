@@ -109,8 +109,8 @@ def main(args):
     explainers = [
             # Simple explainers
             ("Mean",    DensityImageExplainer( MeanDensity())                   ), 
-            ("Blur",   DensityImageExplainer( NoiseDensity(sigma=0.2))         ), 
-            ("Random",   DensityImageExplainer( GaussianBlurDensity(radius=10))  ), 
+            ("Blur",  DensityImageExplainer( GaussianBlurDensity(radius=10))  ), 
+            ("Random",    DensityImageExplainer( NoiseDensity(sigma=0.2))         ), 
 
             # Generative
             ("Local",   DensityImageExplainer( LocalDensity())                  ), 
