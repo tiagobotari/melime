@@ -11,6 +11,8 @@ import sklearn
 from skimage.color import gray2rgb
 from progressbar import ProgressBar
 
+from .densities.local import LocalDensity
+
 class DensityImageExplanation(ImageExplanation):
     def get_image_and_mask(self, label, positive_only=True, negative_only=False, hide_rest=False,
                            num_features=5, min_weight=0.):
@@ -69,6 +71,7 @@ class DensityImageExplainer(LimeImageExplainer):
                 LimeImageExplainer.
         """
         super(DensityImageExplainer, self).__init__(*args, **kwargs)
+        if density is None: density = LocalDensity() # Default density
         self.density = density
 
 
@@ -82,24 +85,6 @@ class DensityImageExplainer(LimeImageExplainer):
         except ValueError as e:
             raise e
         return segments
-
-
-    def fill(self, image, segments, hide_color=None):
-        fill = image.copy()
-        if self.density is not None:
-            fill = self.density.fill(image, segments)
-
-        elif hide_color is None:
-            for x in np.unique(segments):
-                fill[segments == x] = (
-                    np.mean(image[segments == x][:, 0]),
-                    np.mean(image[segments == x][:, 1]),
-                    np.mean(image[segments == x][:, 2]))
-
-        else:
-            fill[:] = hide_color
-
-        return fill
 
 
     # FH: This code is very similar to the original code. I have only
@@ -160,7 +145,7 @@ class DensityImageExplainer(LimeImageExplainer):
         # FH REFACTOR
         # Refactored functions
         segments    = self.segment(image, segmentation_fn, random_seed)
-        fill        = self.fill(image, segments, hide_color=hide_color)
+        fill        = self.density.fill(image, segments)
         # END FH REFACTOR - only variable names changed below
 
         top = labels
@@ -189,4 +174,4 @@ class DensityImageExplainer(LimeImageExplainer):
                 model_regressor=model_regressor,
                 feature_selection=self.feature_selection)
 
-        return ret_exp
+        return ret_exp, fill

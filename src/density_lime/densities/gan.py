@@ -93,7 +93,7 @@ class GANDensity:
         fill = fill.permute(1, 2, 0).cpu().detach().numpy()
         fill = (fill + 1.) / 2.
 
-        if False: # set to true if you wish to see fill
+        if True: # set to true if you wish to see fill
             fig, ax = plt.subplots()
             ax.imshow(fill - fill.min() / fill.max())
             fig.savefig('fill.pdf')
