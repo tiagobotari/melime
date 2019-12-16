@@ -248,8 +248,8 @@ class LimeImageExplainer(object):
         labels = []
         data[0, :] = 1
         imgs = []
-        pbar = ProgressBar(num_samples)
-        pbar.start()
+        # pbar = ProgressBar(num_samples)
+        # pbar.start()
         for row in data:
             temp = copy.deepcopy(image)
             zeros = np.where(row == 0)[0]
@@ -262,9 +262,9 @@ class LimeImageExplainer(object):
                 preds = classifier_fn(np.array(imgs))
                 labels.extend(preds)
                 imgs = []
-            pbar.currval += 1
-            pbar.update()
-        pbar.finish()
+            # pbar.currval += 1
+            # pbar.update()
+        # pbar.finish()
         if len(imgs) > 0:
             preds = classifier_fn(np.array(imgs))
             labels.extend(preds)
