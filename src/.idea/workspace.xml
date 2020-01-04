@@ -2,12 +2,32 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cf636dbe-616e-49d4-bd09-61017ca90b03" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/density_lime/density_vae.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/density_lime/density_vae_trash.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/playground/models/nmist_CNN.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/playground/models/nmist_cnn_2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lime/lime_image.py" beforeDir="false" afterPath="$PROJECT_DIR$/lime/lime_image.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lime/lime_tabular.py" beforeDir="false" afterPath="$PROJECT_DIR$/lime/lime_tabular.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/density_lime/densities/base_density.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/density_lime/explanations/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/density_lime/explanations/linear.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/density_lime/explanations/visualization.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/playground/models/dfc_vae.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/density_lime/densities/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/density_lime/densities/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/density_lime/density_vae.py" beforeDir="false" afterPath="$PROJECT_DIR$/density_lime/densities/density_vae.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/density_lime/density_vae_trash.py" beforeDir="false" afterPath="$PROJECT_DIR$/density_lime/densities/density_vae_trash.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/density_lime/kernel_density_exp.py" beforeDir="false" afterPath="$PROJECT_DIR$/density_lime/densities/density_kde.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/density_lime/kernel_density_exp_pca.py" beforeDir="false" afterPath="$PROJECT_DIR$/density_lime/densities/density_kde_pca.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/density_lime/lime_tabular_manifold.py" beforeDir="false" afterPath="$PROJECT_DIR$/density_lime/lime_tabular_manifold.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/density_lime/test_lime_kde.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/playground/test_lime_kde.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/playground/kde/.ipynb_checkpoints/PCA-checkpoint.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/playground/kde/.ipynb_checkpoints/density_vae-checkpoint.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/playground/kde/.ipynb_checkpoints/density_vae-checkpoint.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/playground/kde/.ipynb_checkpoints/nmist_pca_kde-checkpoint.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/playground/kde/.ipynb_checkpoints/test_lime_kde_spiral-checkpoint.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/playground/kde/PCA.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/playground/kde/density_vae.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/playground/kde/density_vae.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/playground/kde/density_vae_5-Copy1.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/playground/kde/density_vae_5-Copy1.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/playground/kde/mode_vae_manifold.pth" beforeDir="false" afterPath="$PROJECT_DIR$/playground/kde/mode_vae_manifold.pth" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/playground/kde/nmist_pca_kde.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/playground/kde/test_lime_kde_1.py" beforeDir="false" afterPath="$PROJECT_DIR$/playground/kde/test_lime_kde_1.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/playground/kde/test_lime_kde_spiral.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/playground/models/nmist_CNN.py" beforeDir="false" afterPath="$PROJECT_DIR$/playground/models/nmist_CNN.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -15,94 +35,37 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FavoritesManager">
+    <favorites_list name="src" />
+  </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="600">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/density_lime/kernel_density_exp_pca.py">
+        <entry file="file://$PROJECT_DIR$/density_lime/lime_tabular_manifold.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="624">
-              <caret line="13" column="69" selection-start-line="13" selection-start-column="57" selection-end-line="13" selection-end-column="69" />
+            <state relative-caret-position="1584">
+              <caret line="42" column="27" selection-start-line="42" selection-start-column="27" selection-end-line="42" selection-end-column="27" />
               <folding>
-                <element signature="e#1#60#0" expanded="true" />
+                <element signature="e#79#90#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/anaconda3/envs/density-lime3.7/lib/python3.7/site-packages/torch/nn/modules/container.py">
+        <entry file="file://$PROJECT_DIR$/density_lime/densities/base_density.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1322">
-              <caret line="119" column="8" selection-start-line="119" selection-start-column="8" selection-end-line="119" selection-end-column="8" />
+            <state relative-caret-position="432">
+              <caret line="9" column="8" selection-start-line="9" selection-start-column="8" selection-end-line="9" selection-end-column="8" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/anaconda3/envs/density-lime3.7/lib/python3.7/site-packages/torch/optim/optimizer.py">
+        <entry file="file://$PROJECT_DIR$/density_lime/densities/density_vae.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="382">
-              <caret line="199" selection-start-line="199" selection-end-line="199" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/anaconda3/envs/density-lime3.7/lib/python3.7/site-packages/torch/nn/modules/module.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="382">
-              <caret line="584" selection-start-line="584" selection-end-line="584" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/density_lime/density_vae.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2304">
-              <caret line="48" selection-start-line="48" selection-end-line="48" />
-              <folding>
-                <element signature="e#0#12#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/anaconda3/envs/density-lime3.7/lib/python3.7/site-packages/torch/nn/functional.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="398">
-              <caret line="1369" selection-start-line="1369" selection-end-line="1369" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/anaconda3/envs/density-lime3.7/lib/python3.7/multiprocessing/queues.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4400">
-              <caret line="241" selection-start-line="241" selection-end-line="241" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/playground/models/nmist_CNN.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3456">
-              <caret line="81" column="14" selection-start-line="81" selection-start-column="14" selection-end-line="81" selection-end-column="14" />
-              <folding>
-                <element signature="e#0#37#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/playground/models/nmist_cnn_2.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-672">
-              <caret line="25" column="66" selection-start-line="25" selection-start-column="66" selection-end-line="25" selection-end-column="66" />
+            <state relative-caret-position="778">
+              <caret line="114" column="46" selection-start-line="114" selection-start-column="46" selection-end-line="114" selection-end-column="46" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
               </folding>
@@ -111,8 +74,51 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/playground/models/pascal_voc.py">
-          <provider selected="true" editor-type-id="text-editor" />
+        <entry file="file://$PROJECT_DIR$/density_lime/explanations/linear.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="796">
+              <caret line="72" column="23" selection-start-line="72" selection-start-column="23" selection-end-line="72" selection-end-column="23" />
+              <folding>
+                <element signature="e#0#35#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/density_lime/explanations/visualization.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="960">
+              <caret line="21" column="80" selection-start-line="21" selection-start-column="80" selection-end-line="21" selection-end-column="80" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/anaconda3/envs/density-lime3.7/lib/python3.7/site-packages/sklearn/linear_model/huber.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="10752">
+              <caret line="233" column="8" selection-start-line="233" selection-start-column="8" selection-end-line="233" selection-end-column="8" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/anaconda3/envs/density-lime3.7/lib/python3.7/site-packages/sklearn/linear_model/stochastic_gradient.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="49920">
+              <caret line="1068" column="6" selection-start-line="1068" selection-start-column="6" selection-end-line="1068" selection-end-column="6" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/playground/models/nmist_CNN.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="3168">
+              <caret line="73" selection-start-line="73" selection-end-line="73" />
+            </state>
+          </provider>
         </entry>
       </file>
     </leaf>
@@ -139,6 +145,13 @@
       <find>encode</find>
       <find>op</find>
       <find>scheduler</find>
+      <find>784</find>
+      <find>sample_around_instance</find>
+      <find>model_regressor</find>
+      <find>manifold</find>
+      <find>manifol</find>
+      <find>gaussian</find>
+      <find>n_importance</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -151,7 +164,6 @@
         <option value="$PROJECT_DIR$/playground/aux/domain.py" />
         <option value="$PROJECT_DIR$/density_lime/pca_exp.py" />
         <option value="$PROJECT_DIR$/playground/kde/test_kde_iris.py" />
-        <option value="$PROJECT_DIR$/density_lime/lime_tabular_manifold.py" />
         <option value="$PROJECT_DIR$/lime/lime_tabular.py" />
         <option value="$PROJECT_DIR$/density_lime/kernel_density_exp.py" />
         <option value="$PROJECT_DIR$/density_lime/lime_image.py" />
@@ -159,9 +171,25 @@
         <option value="$PROJECT_DIR$/density_lime/kernel_density_exp_pca.py" />
         <option value="$PROJECT_DIR$/playground/models/nmist_cnn_2.py" />
         <option value="$PROJECT_DIR$/density_lime/density_vae_2.py" />
-        <option value="$PROJECT_DIR$/playground/models/nmist_CNN.py" />
-        <option value="$PROJECT_DIR$/density_lime/density_vae.py" />
         <option value="$PROJECT_DIR$/playground/models/pascal_voc.py" />
+        <option value="$PROJECT_DIR$/density_lime/density_vae.py" />
+        <option value="$PROJECT_DIR$/playground/models/dfc_vae.py" />
+        <option value="$PROJECT_DIR$/playground/models/nmist_CNN.py" />
+        <option value="$PROJECT_DIR$/density_lime/densities/base.py" />
+        <option value="$PROJECT_DIR$/density_lime/densities/kernel_density_exp.py" />
+        <option value="$PROJECT_DIR$/density_lime/densities/base_density.py" />
+        <option value="$PROJECT_DIR$/density_lime/densities/__init__.py" />
+        <option value="$PROJECT_DIR$/density_lime/lime_tabular_manifold.py" />
+        <option value="$PROJECT_DIR$/density_lime/densities/density_kde_pca.py" />
+        <option value="$PROJECT_DIR$/density_lime/densities/density_kde.py" />
+        <option value="$PROJECT_DIR$/density_lime/explain.py" />
+        <option value="$PROJECT_DIR$/density_lime/linear_explain.py" />
+        <option value="$PROJECT_DIR$/density_lime/interpretation/linear.py" />
+        <option value="$USER_HOME$/programs/fhi-aims/fhi-aims.171221_1/utilities/aimsplot.py" />
+        <option value="$USER_HOME$/programs/fhi-aims/fhi-aims/utilities/aimsplot.py" />
+        <option value="$PROJECT_DIR$/density_lime/explanations/visualization.py" />
+        <option value="$PROJECT_DIR$/density_lime/densities/density_vae.py" />
+        <option value="$PROJECT_DIR$/density_lime/explanations/linear.py" />
       </list>
     </option>
   </component>
@@ -176,6 +204,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -191,7 +220,30 @@
             <path>
               <item name="src" type="b2602c69:ProjectViewProjectNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="density_lime" type="462c0819:PsiDirectoryNode" />
+              <item name="densities" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="src" type="b2602c69:ProjectViewProjectNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="density_lime" type="462c0819:PsiDirectoryNode" />
+              <item name="explanations" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="src" type="b2602c69:ProjectViewProjectNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="external_modules" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="src" type="b2602c69:ProjectViewProjectNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="playground" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="src" type="b2602c69:ProjectViewProjectNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="playground" type="462c0819:PsiDirectoryNode" />
+              <item name="kde" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="src" type="b2602c69:ProjectViewProjectNode" />
@@ -203,14 +255,18 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../lime" />
+    <property name="last_opened_file_path" value="$USER_HOME$/programs/fhi-aims/fhi-aims.171221_1/utilities/aimsplot.py" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/density_lime/interpretation" />
+      <recent name="$PROJECT_DIR$/playground" />
+      <recent name="$PROJECT_DIR$/density_lime/densities" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/density_lime" />
     </key>
@@ -240,7 +296,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/density_lime/density_vae_trash.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/density_lime/densities/density_vae_trash.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -261,7 +317,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/density_lime/density_vae.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/density_lime/densities/density_vae.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -363,13 +419,14 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="35" width="3840" height="2125" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.19652265" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49973103" visible="true" weight="0.3061117" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info id="Favorites" order="2" sideWeight="0.50026894" side_tool="true" weight="0.19652265" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.1662184" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32974717" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.36793974" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39967725" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -401,22 +458,6 @@
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
     </layout-to-restore>
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/density_lime/kernel_density_exp.py</url>
-          <line>127</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/density_lime/lime_tabular_manifold.py</url>
-          <line>210</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/playground/aux/domain.py">
@@ -467,13 +508,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/density-lime3.7/lib/python3.7/site-packages/sklearn/neighbors/kde.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="816">
-          <caret line="24" column="6" selection-start-line="24" selection-start-column="6" selection-end-line="24" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/playground/kde/test_kde_iris.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="820">
@@ -485,33 +519,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/density_lime/gan_density.py" />
-    <entry file="file://$PROJECT_DIR$/density_lime/lime_tabular_manifold.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="912">
-          <caret line="19" column="28" selection-start-line="19" selection-start-column="28" selection-end-line="19" selection-end-column="28" />
-          <folding>
-            <element signature="e#79#90#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lime/lime_tabular.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="10848">
-          <caret line="244" column="17" selection-start-line="244" selection-start-column="8" selection-end-line="244" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/density_lime/kernel_density_exp.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="480">
-          <caret line="10" selection-start-line="10" selection-end-line="10" />
-          <folding>
-            <element signature="e#0#29#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/anaconda3/envs/density-lime3.7/lib/python3.7/site-packages/torch/nn/modules/container.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1322">
@@ -545,15 +552,8 @@
     </entry>
     <entry file="file://$USER_HOME$/anaconda3/envs/density-lime3.7/lib/python3.7/site-packages/torch/optim/optimizer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="382">
+        <state relative-caret-position="9312">
           <caret line="199" selection-start-line="199" selection-end-line="199" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/density-lime3.7/lib/python3.7/site-packages/torch/nn/functional.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="398">
-          <caret line="1369" selection-start-line="1369" selection-end-line="1369" />
         </state>
       </provider>
     </entry>
@@ -564,16 +564,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$USER_HOME$/anaconda3/envs/density-lime3.7/lib/python3.7/site-packages/torch/nn/functional.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="398">
+          <caret line="1369" selection-start-line="1369" selection-end-line="1369" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$USER_HOME$/anaconda3/envs/density-lime3.7/lib/python3.7/multiprocessing/queues.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4400">
+        <state relative-caret-position="1664">
           <caret line="241" selection-start-line="241" selection-end-line="241" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/playground/models/nmist_cnn_2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-672">
+        <state relative-caret-position="48">
           <caret line="25" column="66" selection-start-line="25" selection-start-column="66" selection-end-line="25" selection-end-column="66" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
@@ -581,45 +588,174 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/density_lime/density_vae_trash.py">
+    <entry file="file://$PROJECT_DIR$/playground/models/pascal_voc.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1664">
+          <caret line="260" column="32" selection-start-line="260" selection-start-column="32" selection-end-line="260" selection-end-column="32" />
+          <folding>
+            <element signature="e#0#64#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/playground/models/dfc_vae.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="48">
+          <caret line="1" column="1" selection-start-line="1" selection-start-column="1" selection-end-line="1" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lime/lime_base.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="8880">
+          <caret line="189" column="11" selection-start-line="189" selection-start-column="11" selection-end-line="190" selection-end-column="67" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lime/lime_tabular.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="20544">
+          <caret line="446" column="72" selection-start-line="446" selection-start-column="72" selection-end-line="446" selection-end-column="72" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/playground/test_lime_kde.ipynb">
+      <provider selected="true" editor-type-id="ipnb-editor">
+        <state>
+          <selected id="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/density_lime/densities/density_vae_trash.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="336">
           <caret line="7" selection-start-line="7" selection-end-line="7" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/playground/models/nmist_CNN.py">
+    <entry file="file://$USER_HOME$/anaconda3/envs/density-lime3.7/lib/python3.7/site-packages/sklearn/base.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3456">
-          <caret line="81" column="14" selection-start-line="81" selection-start-column="14" selection-end-line="81" selection-end-column="14" />
-          <folding>
-            <element signature="e#0#37#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="746">
+          <caret line="139" column="6" selection-start-line="139" selection-start-column="6" selection-end-line="139" selection-end-column="6" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/density_lime/density_vae.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2304">
-          <caret line="48" selection-start-line="48" selection-end-line="48" />
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/density_lime/kernel_density_exp_pca.py">
+    <entry file="file://$PROJECT_DIR$/density_lime/densities/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="624">
-          <caret line="13" column="69" selection-start-line="13" selection-start-column="57" selection-end-line="13" selection-end-column="69" />
+          <caret line="13" selection-start-line="13" selection-end-line="13" />
+          <folding>
+            <element signature="e#0#46#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/density_lime/test_lime_kde.ipynb" />
+    <entry file="file://$USER_HOME$/programs/fhi-aims/fhi-aims.171221_1/utilities/aimsplot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-816">
+          <caret line="291" column="7" selection-start-line="291" selection-start-column="7" selection-end-line="291" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/programs/fhi-aims/fhi-aims/utilities/aimsplot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1184">
+          <caret line="30" column="14" selection-start-line="30" selection-start-column="14" selection-end-line="30" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/density_lime/densities/density_kde.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4256">
+          <caret line="104" column="33" selection-start-line="104" selection-start-column="28" selection-end-line="104" selection-end-column="33" />
+          <folding>
+            <element signature="e#0#29#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/density_lime/densities/density_kde_pca.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1664">
+          <caret line="93" column="36" selection-start-line="93" selection-start-column="28" selection-end-line="93" selection-end-column="36" />
           <folding>
             <element signature="e#1#60#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/playground/models/pascal_voc.py">
-      <provider selected="true" editor-type-id="text-editor" />
+    <entry file="file://$USER_HOME$/anaconda3/envs/density-lime3.7/lib/python3.7/site-packages/sklearn/neighbors/kde.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="816">
+          <caret line="24" column="6" selection-start-line="24" selection-start-column="6" selection-end-line="24" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/density_lime/lime_tabular_manifold.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1584">
+          <caret line="42" column="27" selection-start-line="42" selection-start-column="27" selection-end-line="42" selection-end-column="27" />
+          <folding>
+            <element signature="e#79#90#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/density_lime/densities/base_density.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="9" column="8" selection-start-line="9" selection-start-column="8" selection-end-line="9" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/density_lime/explanations/visualization.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="960">
+          <caret line="21" column="80" selection-start-line="21" selection-start-column="80" selection-end-line="21" selection-end-column="80" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/anaconda3/envs/density-lime3.7/lib/python3.7/site-packages/sklearn/linear_model/huber.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="10752">
+          <caret line="233" column="8" selection-start-line="233" selection-start-column="8" selection-end-line="233" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/anaconda3/envs/density-lime3.7/lib/python3.7/site-packages/sklearn/linear_model/stochastic_gradient.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="49920">
+          <caret line="1068" column="6" selection-start-line="1068" selection-start-column="6" selection-end-line="1068" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/playground/models/nmist_CNN.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3168">
+          <caret line="73" selection-start-line="73" selection-end-line="73" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/density_lime/densities/density_vae.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="778">
+          <caret line="114" column="46" selection-start-line="114" selection-start-column="46" selection-end-line="114" selection-end-column="46" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/density_lime/explanations/linear.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="796">
+          <caret line="72" column="23" selection-start-line="72" selection-start-column="23" selection-end-line="72" selection-end-column="23" />
+          <folding>
+            <element signature="e#0#35#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
     </entry>
   </component>
 </project>
