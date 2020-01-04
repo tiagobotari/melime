@@ -9,8 +9,8 @@ import scipy as sp
 from matplotlib import pyplot as plt
 
 from lime.lime_tabular import *
-from density_lime.kernel_density_exp import KernelDensityExp
-from density_lime.kernel_density_exp_pca import KernelDensityExpPCA, KernelDensityExpKernelPCA
+from density_lime.densities.density_kde import DensityKDE
+from density_lime.densities.density_kde_pca import DensityKDEPCA, DensityKDEKPCA
 
 
 class LimeTabularExplainerManifold(LimeTabularExplainer):
@@ -39,7 +39,8 @@ class LimeTabularExplainerManifold(LimeTabularExplainer):
                  sample_around_instance=False,
                  random_state=None,
                  training_data_stats=None
-                 , manifold='kde'):
+                 , manifold='kde'
+                 , manifold_params={}):
         """Init function.
 
         Args:
@@ -92,6 +93,10 @@ class LimeTabularExplainerManifold(LimeTabularExplainer):
         self.categorical_names = categorical_names or {}
         self.sample_around_instance = sample_around_instance
         self.training_data_stats = training_data_stats
+
+        # TODO: I think I included this, need to check, why I created this variable, I think it was created to plot the
+        # TODO: plot the data
+        self.data = None
 
         # Check and raise proper error in stats are supplied in non-descritized path
         if self.training_data_stats:
@@ -191,15 +196,6 @@ class LimeTabularExplainerManifold(LimeTabularExplainer):
         number_of_samples = 50000
         self.data_sampled = None
         x = self.scaler_original.transform(training_data)
-        # TODO: Remove comments.
-        # print('Mean data::')
-        # print(training_data)
-        # print(np.mean(training_data, axis=0))
-        # print(np.mean(x, axis=0))
-        #
-        # print('Scale:')
-        # print(np.std(training_data, axis=0))
-        # print(np.std(x, axis=0))
 
         if x.shape[0] > number_of_samples:
             ind = np.random.randint(0, x.shape[0], size=number_of_samples)
@@ -207,22 +203,22 @@ class LimeTabularExplainerManifold(LimeTabularExplainer):
 
         # TODO: automatically estimate bandwidth
         self.bandwidth = 0.1
-        self.n_min_kernels = int(x.shape[0]*0.2)
+
         if manifold == 'kde':
-            self.manifold = KernelDensityExp(
-            kernel='gaussian', bandwidth=self.bandwidth).fit(x)
-        elif manifold == 'pca-kde':
+            self.manifold = DensityKDE(
+            kernel='gaussian', bandwidth=self.bandwidth, **manifold_params).fit(x)
+        elif manifold == 'kde-pca':
             # TODO: Chose of n_components is arbitrary.
             n_components = int(np.sqrt(x.shape[1]))
-            self.manifold = KernelDensityExpPCA(
-                kernel='gaussian', bandwidth=self.bandwidth, n_components=n_components).fit(x)
-        elif manifold == 'kernel-pca-kde':
+            self.manifold = DensityKDEPCA(
+                kernel='gaussian', bandwidth=self.bandwidth, n_components=n_components, **manifold_params).fit(x)
+        elif manifold == 'kde-kpca':
             # TODO: Chose of n_components is arbitrary.
             n_components = int(np.sqrt(x.shape[1]))
-            self.manifold = KernelDensityExpKernelPCA(
-                kernel='gaussian', bandwidth=self.bandwidth, n_components=n_components).fit(x)
+            self.manifold = DensityKDEKPCA(
+                kernel='gaussian', bandwidth=self.bandwidth, n_components=n_components, **manifold_params).fit(x)
         else:
-            raise Exception('The manifold value should be a valid options: kde, pca-kde.')
+            raise Exception('The manifold value should be a valid options: kde, kde-pca, and kde-kpca.')
 
     def explain_instance_manifold(self,
                                   data_row,
@@ -232,7 +228,11 @@ class LimeTabularExplainerManifold(LimeTabularExplainer):
                                   num_features=10,
                                   num_samples=5000,
                                   distance_metric='euclidean',
-                                  model_regressor=None):
+                                  model_regressor=None
+                                  , r_density=None
+                                  , n_min_kernels=None
+                                  , scale_data=True
+                                  ):
         """Generates explanations for a prediction.
 
         First, we generate neighborhood data by randomly perturbing features
@@ -260,6 +260,10 @@ class LimeTabularExplainerManifold(LimeTabularExplainer):
             model_regressor: sklearn regressor to use in explanation. Defaults
                 to Ridge regression in LimeBase. Must have model_regressor.coef_
                 and 'sample_weight' as a parameter to model_regressor.fit()
+            # TODO: TB: check this variables and see with the scale_data=False is a good choice.
+            r_density: radius to find the neighborhood
+            n_min_kernels: number of kernels, maybe move from here
+            scale_data: boolean value to produce the interpretation in the original feature space
 
         Returns:
             An Explanation object (see explanation.py) with the corresponding
@@ -268,8 +272,17 @@ class LimeTabularExplainerManifold(LimeTabularExplainer):
         if sp.sparse.issparse(data_row) and not sp.sparse.isspmatrix_csr(data_row):
             # Preventative code: if sparse, convert to csr format if not in csr format already
             data_row = data_row.tocsr()
-        data, inverse = self.__data_inverse_manifold(data_row, num_samples, n_min_kernels=self.n_min_kernels)
-        self.data = data
+        if isinstance(n_min_kernels, float) and n_min_kernels <=1.0:
+            n_min_kernels = int(x.shape[0] * 0.1)
+            data, inverse = self.__data_inverse_manifold(data_row, num_samples, n_min_kernels=n_min_kernels)
+        elif isinstance(n_min_kernels, int):
+            data, inverse = self.__data_inverse_manifold(data_row, num_samples, n_min_kernels=n_min_kernels)
+        elif r_density is not None:
+            data, inverse = self.__data_inverse_manifold(data_row, num_samples, r_density=r_density)
+        else:
+            raise Exception('The r_density or n_min_kernels should be defined.')
+
+        self.data = inverse
         if sp.sparse.issparse(data):
             # Note in sparse case we don't subtract mean since data would become dense
             scaled_data = data.multiply(self.scaler.scale_)
@@ -277,7 +290,12 @@ class LimeTabularExplainerManifold(LimeTabularExplainer):
             if not sp.sparse.isspmatrix_csr(scaled_data):
                 scaled_data = scaled_data.tocsr()
         else:
-            scaled_data = (data - self.scaler.mean_) / self.scaler.scale_
+            # TODO: TB: I believe that scale the data is not good practice
+            if scale_data:
+                scaled_data = (data - self.scaler.mean_) / self.scaler.scale_
+            else:
+                scaled_data = data
+
         distances = sklearn.metrics.pairwise_distances(
                 scaled_data,
                 scaled_data[0].reshape(1, -1),
@@ -396,7 +414,7 @@ class LimeTabularExplainerManifold(LimeTabularExplainer):
 
         return ret_exp
 
-    def __data_inverse_manifold(self, data_row, num_samples, n_min_kernels=50):
+    def __data_inverse_manifold(self, data_row, num_samples, n_min_kernels=None, r_density=None):
         """Generates a neighborhood around a prediction.
 
         For numerical features, perturb them by sampling from a Normal(0,1) and
@@ -427,16 +445,18 @@ class LimeTabularExplainerManifold(LimeTabularExplainer):
         if self.sample_around_instance:
             # TODO: There is a problem when the selected ball radius has no points, maybe we should include some
             # TODO: initial density and sum the kernel.
-            # Loop to increase the radius ball to find the kernels.
-            # data = self.scaler_original.inverse_transform(self.manifold.sample_radius(
-            #     x_exp=x_explain_scaled.reshape(1, -1), r=r, n_samples=num_samples, random_state=None))
-            data = self.scaler_original.inverse_transform(
-                self.manifold.sample_radius(
-                    x_exp=x_explain_scaled.reshape(1, -1)
-                    , n_min_kernels=n_min_kernels
-                    , n_samples=num_samples
-                    , random_state=None
-                ))
+
+            if r_density is not None:
+                data = self.scaler_original.inverse_transform(self.manifold.sample_radius(
+                    x_exp=x_explain_scaled.reshape(1, -1), r=r_density, n_samples=num_samples, random_state=None))
+            else:
+                data = self.scaler_original.inverse_transform(
+                    self.manifold.sample_radius(
+                        x_exp=x_explain_scaled.reshape(1, -1)
+                        , n_min_kernels=n_min_kernels
+                        , n_samples=num_samples
+                        , random_state=None
+                    ))
         else:
             data = self.scaler_original.inverse_transform(
                 self.manifold.sample(n_samples=num_samples, random_state=None, scaler=self.scaler))
@@ -446,11 +466,14 @@ class LimeTabularExplainerManifold(LimeTabularExplainer):
 
         return data, inverse
 
-    def plot_samples(self, ax):
+    def plot_samples(self, ax, model=None, **kwargs):
         if self.data is not None:
-            return self.plot(self.data, ax, alpha=0.1)
+            if model is None:
+                return self.plot(self.data, ax, s=1, **kwargs)
+            else:
+                return self.plot(self.data, ax, s=1, y=model.predict(self.data), **kwargs)
 
-    def plot(self, x, ax=None, alpha=1.0, figsize=(10, 10)):
+    def plot(self, x, ax=None, alpha=1.0, figsize=(10, 10), y=None, **kwargs):
         import itertools
         n_cols = len(self.feature_names)
         indices_cols = range(n_cols)
@@ -464,14 +487,22 @@ class LimeTabularExplainerManifold(LimeTabularExplainer):
             col1 = sel[0]
             col2 = sel[1]
             axi = ax[col1, col2]
-            axi.scatter(x[:, col2], x[:, col1], alpha=alpha)
+            if y is not None:
+                cp = axi.scatter(x[:, col2], x[:, col1], alpha=alpha, c=y,  **kwargs)
+            else:
+                cp = None
+                axi.scatter(x[:, col2], x[:, col1], alpha=alpha, c=y,  **kwargs)
             # axi.text(
             #     0, 1, '{} - {}'.format(col1, col2), fontsize=12, fontweight="bold", va="bottom", ha="left"
             #     , transform=axi.transAxes)
             axi = ax[col2, col1]
-            axi.scatter(x[:, col1], x[:, col2], alpha=alpha)
+
+            axi.scatter(x[:, col1], x[:, col2], alpha=alpha, c=y, **kwargs)
+
         for i, label in enumerate(self.feature_names):
             ax[-1, i].set_xlabel(label)
             ax[i, 0].set_ylabel(label)
         # plt.tight_layout()
+        if cp is not None:
+            return ax, cp
         return ax

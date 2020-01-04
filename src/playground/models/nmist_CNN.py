@@ -71,6 +71,7 @@ def test(model, device, test_loader):
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
 
+
 def train_and_save_model(path=None):
     no_cuda = False
     gamma = 0.7

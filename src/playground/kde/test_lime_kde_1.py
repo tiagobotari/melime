@@ -39,3 +39,10 @@ i = 25
 exp = explainer.explain_instance_manifold(x_test[i], rf.predict, num_features=5)
 exp.as_pyplot_figure()
 plt.show()
+
+
+import matplotlib.pyplot as plt
+import seaborn as sns; sns.set()
+iris = sns.load_dataset("iris")
+g = sns.PairGrid(iris)
+g = g.map(plt.scatter)
