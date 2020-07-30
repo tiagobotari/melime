@@ -100,3 +100,9 @@ class DensityKDEIsomap(Density):
         x_sample_pca = self.manifold.sample(n_samples=n_samples, random_state=random_state)
         x_sample = self.transformer.inverse_transform(x_sample_pca)
         return x_sample
+
+
+if __name__ == '__main__':
+    import torchvision.models.quantization as models
+
+    model_fe = models.resnet18(pretrained=True, progress=True, quantize=True)
