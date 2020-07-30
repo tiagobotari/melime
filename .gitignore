@@ -29,6 +29,7 @@
 .idea/**/shelf
 .idea/**
 m-lime/.idea
+*/.ipynb_checkpoints/*
 
 # Generated files
 .idea/**/contentModel.xml
