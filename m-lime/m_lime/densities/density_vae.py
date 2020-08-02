@@ -3,11 +3,10 @@ import torch.utils.data
 from torch import nn, optim
 from torch.nn import functional
 
-from density_lime.densities.base_density import Density
+from m_lime.densities.base import Density
 
 
 class DensityVAE(Density):
-
     def __init__(self, input_dim=None, verbose=False, model=None, **kwargs):
         if model is None:
             self.model = ModelVAE(input_dim=input_dim, verbose=verbose, **kwargs)
@@ -36,7 +35,7 @@ class DensityVAE(Density):
             # TODO: TB: I am not sure if is better or not multiply the distance r by std_r.
             # TODO: TB: preliminary tests indicate that is better to not use std_r.
             # std_r = torch.exp(0.5 * log_var_p).to(self.model.device)
-            noise = torch.rand(n_samples, self.model.latent_dim).to(self.model.device)*r  # std_r *
+            noise = torch.rand(n_samples, self.model.latent_dim).to(self.model.device) * r  # std_r *
             mu_m = mu_m + noise
             z = self.model.model.reparameterize(mu_m, log_var_p)
             x_p = self.model.model.decode(z)
@@ -59,28 +58,27 @@ class DensityVAE(Density):
 
 
 class ModelVAE(object):
-
     def __init__(self, input_dim, nodes_dim=400, n_layers=2, latent_dim=12, cuda=True, verbose=False):
         self.verbose = verbose
         self.latent_dim = latent_dim
         self.input_dim = input_dim
         self.n_layers = n_layers
         self.nodes_dim = nodes_dim
-        
+
         self.batch_size = 128
         self.cuda = cuda
-        self.kwargs = {'num_workers': 1, 'pin_memory': True} if cuda else {}
+        self.kwargs = {"num_workers": 1, "pin_memory": True} if cuda else {}
 
         self.device = torch.device("cuda" if self.cuda else "cpu")
         self.device_cpu = torch.device("cpu")
 
         self.model = VAE(
-            self.input_dim
-            , nodes_dim=self.nodes_dim
-            , n_layers=self.n_layers
-            , latent_dim=self.latent_dim
-            , device=self.device
-            ).to(self.device)
+            self.input_dim,
+            nodes_dim=self.nodes_dim,
+            n_layers=self.n_layers,
+            latent_dim=self.latent_dim,
+            device=self.device,
+        ).to(self.device)
 
         self.optimizer = optim.Adam(self.model.parameters(), lr=1e-3)
         self.log_interval = 10
@@ -98,14 +96,18 @@ class ModelVAE(object):
             self.optimizer.step()
             if self.verbose:
                 if batch_idx % self.log_interval == 0:
-                    print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                        epoch, batch_idx * len(data), len(train_loader.dataset),
-                               100. * batch_idx / len(train_loader),
-                               loss.item() / len(data)))
+                    print(
+                        "Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}".format(
+                            epoch,
+                            batch_idx * len(data),
+                            len(train_loader.dataset),
+                            100.0 * batch_idx / len(train_loader),
+                            loss.item() / len(data),
+                        )
+                    )
 
         if self.verbose:
-            print('Epoch: {} - Mean loss: {:.4f}'.format(
-                epoch, train_loss / len(train_loader.dataset)))
+            print("Epoch: {} - Mean loss: {:.4f}".format(epoch, train_loss / len(train_loader.dataset)))
 
     def test(self, test_loader):
         self.model.eval()
@@ -117,7 +119,7 @@ class ModelVAE(object):
                 test_loss += self.loss_function(recon_batch, data, mu, log_var).item()
 
         test_loss /= len(test_loader.dataset)
-        print('Loss test set: {:.4f}'.format(test_loss))
+        print("Loss test set: {:.4f}".format(test_loss))
 
     def train_epochs(self, train_loader, epochs):
         for epoch in range(1, epochs + 1):
@@ -125,7 +127,7 @@ class ModelVAE(object):
 
     def loss_function(self, recon_x, x, mu, log_var):
         # TODO: check if this is the best loss
-        bce = functional.binary_cross_entropy(recon_x, x.view(-1, self.input_dim), reduction='sum')
+        bce = functional.binary_cross_entropy(recon_x, x.view(-1, self.input_dim), reduction="sum")
         # see Appendix B from VAE paper:
         # Kingma and Welling. Auto-Encoding Variational Bayes. ICLR, 2014
         # https://arxiv.org/abs/1312.6114
@@ -141,7 +143,7 @@ class VAE(nn.Module):
         self.latent_dim = latent_dim
         self.nodes_dim = nodes_dim
         self.device = device
-        
+
         self.layers_encoder = nn.ModuleList(self.create_layers(self.input_dim, self.nodes_dim, n_layers))
 
         # Mu and log_var
@@ -172,9 +174,9 @@ class VAE(nn.Module):
 
     @staticmethod
     def reparameterize(mu, log_var):
-        std = torch.exp(0.5*log_var)
+        std = torch.exp(0.5 * log_var)
         eps = torch.randn_like(std)
-        return mu + eps*std
+        return mu + eps * std
 
     @staticmethod
     def create_layers(input_dim, nodes_dim, n_layers):
@@ -186,7 +188,7 @@ class VAE(nn.Module):
         return layers
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from torchvision import datasets, transforms
     import torchvision
     import torchvision.transforms as transforms
@@ -202,50 +204,45 @@ if __name__ == '__main__':
     # in the pytorch VAE example, this is 20
     ZDIMS = 20
 
+    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    folder_data = "/home/tiago/projects/density-lime/src/playground/kde/data"
+    trainset = torchvision.datasets.CIFAR10(root=folder_data, train=True, download=True, transform=transform)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=4, shuffle=True, num_workers=2)
 
-    transform = transforms.Compose(
-        [transforms.ToTensor(),
-         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-    folder_data = '/home/tiago/projects/density-lime/src/playground/kde/data'
-    trainset = torchvision.datasets.CIFAR10(root=folder_data, train=True,
-                                            download=True, transform=transform)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
-                                              shuffle=True, num_workers=2)
+    testset = torchvision.datasets.CIFAR10(root=folder_data, train=False, download=True, transform=transform)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=4, shuffle=False, num_workers=2)
 
-    testset = torchvision.datasets.CIFAR10(root=folder_data, train=False,
-                                           download=True, transform=transform)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=4,
-                                             shuffle=False, num_workers=2)
-
-    classes = ('plane', 'car', 'bird', 'cat',
-               'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+    classes = ("plane", "car", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck")
 
     density = DensityVAE(input_dim=3072, verbose=True)
     density.fit(trainloader)
 
-
     exit()
     from torchvision import datasets, transforms
-
 
     epochs = 5
     cuda = True
     batch_size = 128
-    kwargs = {'num_workers': 1, 'pin_memory': True} if cuda else {}
+    kwargs = {"num_workers": 1, "pin_memory": True} if cuda else {}
 
     train_loader = torch.utils.data.DataLoader(
-        datasets.MNIST('../data', train=True, download=True,
-                       transform=transforms.ToTensor()),
-        batch_size=batch_size, shuffle=True, **kwargs)
+        datasets.MNIST("../data", train=True, download=True, transform=transforms.ToTensor()),
+        batch_size=batch_size,
+        shuffle=True,
+        **kwargs
+    )
     test_loader = torch.utils.data.DataLoader(
-        datasets.MNIST('../data', train=False, transform=transforms.ToTensor()),
-        batch_size=batch_size, shuffle=True, **kwargs)
+        datasets.MNIST("../data", train=False, transform=transforms.ToTensor()),
+        batch_size=batch_size,
+        shuffle=True,
+        **kwargs
+    )
 
     density = DensityVAE(input_dim=784, verbose=True)
     density.fit(train_loader, epochs=4)
 
     for data in test_loader:
-        x_1 = (data)
+        x_1 = data
         break
 
     x_img = x_1[0][1].reshape(28, 28)
@@ -259,6 +256,6 @@ if __name__ == '__main__':
     # img = sample.view(64, 1, 28, 28)
     fig, ax1 = plt.subplots(1, 1)
     # ax1.imshow(img[50][0], interpolation = 'none')
-    ax1.imshow(x_img_plot, interpolation='none')
+    ax1.imshow(x_img_plot, interpolation="none")
     # ax1.set_title('Digit: {}'.format(y))
     plt.show()

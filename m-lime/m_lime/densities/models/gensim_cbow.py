@@ -4,7 +4,6 @@ import gensim
 
 
 class GensimCBOW:
-
     def __init__(self, x=None, tokenize_corpus=True):
         super().__init__()
         self.tokenize_corpus = tokenize_corpus
@@ -16,7 +15,6 @@ class GensimCBOW:
                 x = Dataset(sentences=x)
         # self.model = Word2Vec(sentences=None, min_count=1, sg=0, hs=0, negative=5, workers=1)
         self.model = Word2Vec(sentences=x, min_count=1, sg=0, hs=0, negative=5, workers=1, compute_loss=True)
-        
 
     def fit(self, x, y=None, sample_weight=None, epochs=None):
         if self.tokenize_corpus:
@@ -38,7 +36,7 @@ class GensimCBOW:
 
     def save(self, file_name):
         self.model.save(file_name)
-    
+
     def load(self, file_name):
         self.model.load(file_name)
 
@@ -46,7 +44,7 @@ class GensimCBOW:
 class Dataset:
     def __init__(self, sentences):
         self.sentences = sentences
-    
+
     def __len__(self):
         return len(self.sentences)
 
@@ -54,12 +52,11 @@ class Dataset:
         for sentence in self.sentences:
             tokens = sentence.split()
             yield tokens
-    
+
     def __getitem__(self, i):
         tokens = self.sentences[i].split()
         return tokens
-        
+
+
 def tokenize_corpus(corpus):
     return [phrases.split() for phrases in corpus]
-    
-
