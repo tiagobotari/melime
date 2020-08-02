@@ -2,15 +2,12 @@ from functools import partial
 import numpy as np
 
 from scipy.special import gammainc
-
 from sklearn.neighbors.kde import KernelDensity
 from sklearn.utils.extmath import row_norms
 from sklearn.utils import check_random_state
-
-from density_lime.densities.base_density import Density
-
 from sklearn.model_selection import GridSearchCV
-# from sklearn.model_selection import LeaveOneOut
+
+from m_lime.densities.base import Density
 
 
 def gaussian(x, kernel_width):
@@ -31,30 +28,29 @@ class DensityKDE(Density):
     Modification of KenelDensity from sklearn do sample data around a specific point.
     # TODO: I do not remember what Exp mean in the name, maybe a better name can be suggested.
     """
+
     def __init__(self, search_best=True, verbose=True, **kwargs):
         super().__init__()
         self.manifold = KernelDensity(**kwargs)
-        if 'bandwidth' in kwargs:
-            self.bandwidth = kwargs['bandwidth']
+        if "bandwidth" in kwargs:
+            self.bandwidth = kwargs["bandwidth"]
         self.search_best = search_best
         self.verbose = verbose
 
-    def fit(self, x, y=None, sample_weight=None, ):
+    def fit(
+        self, x, y=None, sample_weight=None,
+    ):
         if self.search_best:
             bandwidths = np.linspace(0.01, 0.5, 10)
-            grid = GridSearchCV(estimator=self.manifold
-                                , param_grid={'bandwidth': bandwidths}
-                                , cv=5
-                                , n_jobs=-1
-                                )
+            grid = GridSearchCV(estimator=self.manifold, param_grid={"bandwidth": bandwidths}, cv=5, n_jobs=-1)
             grid.fit(x)
             self.manifold = grid.best_estimator_
             best_params_ = grid.best_params_
-            self.bandwidth = best_params_['bandwidth']
+            self.bandwidth = best_params_["bandwidth"]
             if self.verbose:
-                print('Best Parameter for the KDE:')
+                print("Best Parameter for the KDE:")
                 print(best_params_)
-                print('Score:', grid.best_score_)
+                print("Score:", grid.best_score_)
                 # print('CV:')
                 # print(grid.cv_results_)
             return self
@@ -73,7 +69,7 @@ class DensityKDE(Density):
         if kernel_width is None:
             kernel_width = 0.1
         if r is None:
-            r = kernel_width*4.0
+            r = kernel_width * 4.0
         if kernel is None:
             kernel = gaussian
 
@@ -90,8 +86,7 @@ class DensityKDE(Density):
 
         d = np.sqrt(np.sum((x - x_exp) ** 2, axis=1))
         sample_weight = kernel_(d)
-        return DensityKDE(
-            kernel='gaussian', bandwidth=self.bandwidth).fit(x, sample_weight=sample_weight)
+        return DensityKDE(kernel="gaussian", bandwidth=self.bandwidth).fit(x, sample_weight=sample_weight)
 
     def predict(self, x, kernel_width=None):
         """
@@ -127,7 +122,7 @@ class DensityKDE(Density):
         """
         # TODO: TB: This TODO is from Sklearn
         # TODO: implement sampling for other valid kernel shapes
-        if self.manifold.kernel not in ['gaussian', 'tophat']:
+        if self.manifold.kernel not in ["gaussian", "tophat"]:
             raise NotImplementedError()
 
         # TODO: TB comment.
@@ -147,7 +142,7 @@ class DensityKDE(Density):
         # TODO: TB: I had implemented a version que transform the tree structure to numpy array
         # TODO: TB: and then do the selection. This is not a good strategy.
         # data = np.asarray(self.tree_.data[ind_])
-        data = np.asarray(self.manifold.tree_.data)
+        data = np.asarray(self.manifold.tree_.data)  # TODO: I am coping all the tree.
         data = data[ind_]
         if data.shape[0] == 0:
             return np.empty(data.shape)
@@ -161,20 +156,18 @@ class DensityKDE(Density):
             sum_weight = cumsum_weight[-1]
             i = np.searchsorted(cumsum_weight, u * sum_weight)
 
-        if self.manifold.kernel == 'gaussian':
+        if self.manifold.kernel == "gaussian":
             return np.atleast_2d(rng.normal(data[i], self.bandwidth))
 
-        elif self.manifold.kernel == 'tophat':
+        elif self.manifold.kernel == "tophat":
             # we first draw points from a d-dimensional normal distribution,
             # then use an incomplete gamma function to map them to a uniform
             # d-dimensional tophat distribution.
             dim = data.shape[1]
             X = rng.normal(size=(n_samples, dim))
             s_sq = row_norms(X, squared=True)
-            correction = (gammainc(0.5 * dim, 0.5 * s_sq) ** (1. / dim)
-                          * self.bandwidth / np.sqrt(s_sq))
+            correction = gammainc(0.5 * dim, 0.5 * s_sq) ** (1.0 / dim) * self.bandwidth / np.sqrt(s_sq)
             return data[i] + X * correction[:, np.newaxis]
 
     def sample(self, n_samples=1, random_state=None):
         return self.manifold.sample(n_samples=n_samples, random_state=random_state)
-

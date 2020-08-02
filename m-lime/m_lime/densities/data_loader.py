@@ -10,7 +10,7 @@ from torchvision import transforms, utils
 
 # Ignore warnings
 import warnings
+
 warnings.filterwarnings("ignore")
 
-plt.ion()   # interactive mode
-
+plt.ion()  # interactive mode
