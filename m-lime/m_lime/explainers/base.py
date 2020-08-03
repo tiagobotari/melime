@@ -4,12 +4,20 @@ from collections import defaultdict
 import numpy as np
 
 from m_lime.explainers.local_models.statistics import BasicStatistics
+from m_lime.explainers.local_models.linear import RidgeMod, HuberRegressorMod, SGDRegressorMod
 
 
-standard_local_models = {"BasicStatistics": BasicStatistics}
+standard_local_models = {
+    "BasicStatistics": BasicStatistics,
+    "SGD": SGDRegressorMod,
+    "Ridge": RidgeMod,
+    "HuberRegressor": HuberRegressorMod
+}
+
 
 def transformer_identity(x):
     return x
+
 
 class ExplainerBase:
     
@@ -28,8 +36,9 @@ class ExplainerBase:
         :param model_predict: model that the explanation want to be generated.
         :param density:  Density class, manifold estimation object that will be used to sample data.
         :param local_model: linear model that will be used to generate the explanation.
-        :self.transformer: transformation to be applied to the features to generate the features to explain
+        :param transformer: transformation to be applied to the features for generating the features used to explain
         :param random_state: seed for random condition.
+        :param verbose: bool to control with information will be printed on screen.
         """
         self.model_predict = model_predict
         self.density = density
@@ -78,12 +87,18 @@ class ExplainerBase:
         :return: explanation in a dict with importance, see status
         """
         diff = None
-        y_p_explain = self.model_predict(x_explain)[0][class_index]
+        y_p_explain = self.model_predict(x_explain)
+        if len(y_p_explain.shape)==2:
+            y_p_explain = y_p_explain[0][class_index]
+        else: 
+            y_p_explain = y_p_explain[0]
+
         self.local_model = self.local_algorithm(
-            x_explain, y_p_explain, features_names=features_names, tol_convergence=tol)
+            x_explain, y_p_explain, features_names=features_names, r=r, tol_convergence=tol)
         stats = {}
         con_fav_samples = ConFavExaples()
         self.density.generated_data = None
+        
         for step in range(local_mini_batch_max):
             if self.density.transformer:
                 x_set, chi_set = self.density.sample_radius(x_explain, r, n_samples=n_samples)
@@ -92,7 +107,11 @@ class ExplainerBase:
                 chi_set = self.transformer(x_set)
             if x_set is None:
                 break
-            y_p = self.model_predict(x_set)[:, class_index]
+            y_p = self.model_predict(x_set)
+            # TODO: Look for the statistics.
+            # self.stats_(y_p)
+            if len(y_p.shape) != 1:
+                y_p = y_p[:, class_index]
             con_fav_samples.insert_many(x_set, y_p)
             self.local_model.partial_fit(chi_set, y_p)
             diff = self.local_model.measure_convergence()

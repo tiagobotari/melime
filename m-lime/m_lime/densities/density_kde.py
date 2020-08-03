@@ -3,9 +3,11 @@ import numpy as np
 
 from scipy.special import gammainc
 from sklearn.neighbors.kde import KernelDensity
+# from sklearn.neighbors import KernelDensity
 from sklearn.utils.extmath import row_norms
 from sklearn.utils import check_random_state
 from sklearn.model_selection import GridSearchCV
+from scipy.stats import multivariate_normal
 
 from m_lime.densities.base import Density
 
@@ -31,6 +33,7 @@ class DensityKDE(Density):
 
     def __init__(self, search_best=True, verbose=True, **kwargs):
         super().__init__()
+        
         self.manifold = KernelDensity(**kwargs)
         if "bandwidth" in kwargs:
             self.bandwidth = kwargs["bandwidth"]
@@ -142,7 +145,7 @@ class DensityKDE(Density):
         # TODO: TB: I had implemented a version que transform the tree structure to numpy array
         # TODO: TB: and then do the selection. This is not a good strategy.
         # data = np.asarray(self.tree_.data[ind_])
-        data = np.asarray(self.manifold.tree_.data)  # TODO: I am coping all the tree.
+        data = np.asarray(self.manifold.tree_.data)  # TODO: I am coping all the tree. Not good!
         data = data[ind_]
         if data.shape[0] == 0:
             return np.empty(data.shape)

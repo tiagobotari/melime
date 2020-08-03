@@ -9,8 +9,8 @@ import scipy as sp
 from matplotlib import pyplot as plt
 
 from lime.lime_tabular import *
-from density_lime.densities.density_kde import DensityKDE
-from density_lime.densities.density_kde_pca import DensityKDEPCA, DensityKDEKPCA
+from m_lime.densities.density_kde import DensityKDE
+from m_lime.densities.density_kde_pca import DensityKDEPCA, DensityKDEKPCA
 
 
 class LimeTabularExplainerManifold(LimeTabularExplainer):
