@@ -8,6 +8,9 @@ from abc import ABC, abstractmethod
 class Density(ABC):
     def __init__(self):
         self.manifold = None
+        self.transformer = None
+        self.generated_data = None
+        
 
     @abstractmethod
     def fit(self, x):

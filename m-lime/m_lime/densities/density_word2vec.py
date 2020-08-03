@@ -1,6 +1,3 @@
-import sys
-
-sys.path.append("../../")
 from enum import Enum
 import numpy as np
 

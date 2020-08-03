@@ -7,8 +7,8 @@ class BasicStatistics(LocalModelBase):
     """
     Basic descriptive statistics for generating explanation.
     """
-    def __init__(self, x_explain, y_p_explain, features_names, tol_convergence=0.001):
-        super().__init__(x_explain, y_p_explain, features_names, tol_convergence)
+    def __init__(self, x_explain, y_p_explain, features_names, r=None, tol_convergence=0.001):
+        super().__init__(x_explain, y_p_explain, features_names, r, tol_convergence)
         self.values = {}
         # self.values = {e: [] for e in self.features_names}
 
