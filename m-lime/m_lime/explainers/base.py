@@ -56,7 +56,7 @@ class ExplainerBase:
                     "You can also use our own linear model inheriting from LocalModelBase."
                 )
         else:
-            self.local_model = local_model
+            self.local_algorithm = local_model
             self.local_model_name = "custom"
 
         self.predictions_index = set()
@@ -151,6 +151,10 @@ class ExplainerBase:
 
 
 class ConFavExaples(object):
+    """
+    Class to save the n_max top favarable and
+    n_max top contrary samples found.
+    """
     def __init__(self, n_max=5):
         self.n_max = n_max
         self.y_con = list()
@@ -162,27 +166,30 @@ class ConFavExaples(object):
         for sample, y in zip(samples, ys):
             self.insert(sample, y)
 
-    def insert(self, sample, y):
-        if len(self.y_con) < self.n_max:
-            self.y_con.append(y)
-            self.samples_con.append(sample)
-        else:
-            if y > self.y_con[-1]:
-                self.y_con[-1] = y
-                self.samples_con[-1] = sample
-        indices_ = np.argsort(self.y_con).reshape(-1)[::-1]
-        self.y_con = [self.y_con[e] for e in indices_]
-        self.samples_con = [self.samples_con[e] for e in indices_]
+    def insert(self, sample, y): 
+        # Favorable Samples
         if len(self.y_fav) < self.n_max:
             self.y_fav.append(y)
             self.samples_fav.append(sample)
         else:
-            if y < self.y_fav[-1]:
+            if y > self.y_fav[-1]:
                 self.y_fav[-1] = y
                 self.samples_fav[-1] = sample
-        indices_ = np.argsort(self.y_fav).reshape(-1)
+        indices_ = np.argsort(self.y_fav).reshape(-1)[::-1]
         self.y_fav = [self.y_fav[e] for e in indices_]
         self.samples_fav = [self.samples_fav[e] for e in indices_]
+        
+        # Contrary Samples
+        if len(self.y_con) < self.n_max:
+            self.y_con.append(y)
+            self.samples_con.append(sample)
+        else:
+            if y < self.y_con[-1]:
+                self.y_con[-1] = y
+                self.samples_con[-1] = sample
+        indices_ = np.argsort(self.y_con).reshape(-1)
+        self.y_con = [self.y_con[e] for e in indices_]
+        self.samples_con = [self.samples_con[e] for e in indices_]
 
     def print_results(self):
         print("Contrary:")
