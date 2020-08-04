@@ -9,8 +9,8 @@ from m_lime.explainers.local_models.base import LocalModelBase
 class LocalModelLinear(LocalModelBase):
     def __init__(self, x_explain, y_p_explain, features_names, r, tol_convergence=0.001):
         super().__init__(x_explain, y_p_explain, features_names, r, tol_convergence)
-        # 
-        self.gaussian = multivariate_normal(mean=x_explain[0], cov=r*0.75)
+        self.gaussian = multivariate_normal(
+            mean=x_explain[0], cov=np.sqrt(x_explain.flatten().shape[0]) * .75)
         self.model = None
 
     def measure_convergence(self):
@@ -22,28 +22,54 @@ class LocalModelLinear(LocalModelBase):
 
 
 class SGDRegressorMod(LocalModelLinear):
-    def __init__(self, x_explain, y_p_explain, features_names, r, tol_convergence=0.001):
+    def __init__(
+        self,
+        x_explain,
+        y_p_explain,
+        features_names,
+        r,
+        tol_convergence=0.001, 
+        loss="squared_loss",
+        penalty="l2",
+        l1_ratio=0.0,
+        fit_intercept=True,
+        max_iter=100000,
+        tol=1e-05,
+        shuffle=True,
+        verbose=0,
+        epsilon=0.1,
+        random_state=None,
+        learning_rate="adaptive",
+        eta0=0.0005,
+        power_t=0.25,
+        early_stopping=False,
+        validation_fraction=0.1,
+        n_iter_no_change=100,
+        warm_start=False,
+        average=100,
+        alpha=0.003
+        ):
         super().__init__(x_explain, y_p_explain, features_names, r, tol_convergence)
         self.model = SGDRegressor(
-            loss="squared_loss",
-            penalty="l2",
-            l1_ratio=0.0,
-            fit_intercept=True,
-            max_iter=100000,
-            tol=1e-05,
-            shuffle=True,
-            verbose=0,
-            epsilon=0.1,
-            random_state=None,
-            learning_rate="adaptive",
-            eta0=0.0005,
-            power_t=0.25,
-            early_stopping=False,
-            validation_fraction=0.1,
-            n_iter_no_change=100,
+            loss=loss,
+            penalty=penalty,
+            l1_ratio=l1_ratio,
+            fit_intercept=fit_intercept,
+            max_iter=max_iter,
+            tol=tol,
+            shuffle=shuffle,
+            verbose=verbose,
+            epsilon=epsilon,
+            random_state=random_state,
+            learning_rate=learning_rate,
+            eta0=eta0,
+            power_t=power_t,
+            early_stopping=early_stopping,
+            validation_fraction=validation_fraction,
+            n_iter_no_change=n_iter_no_change,
             warm_start=False,
-            average=100,
-            alpha=0.003
+            average=average,
+            alpha=alpha
         )
         self.weight = None
 

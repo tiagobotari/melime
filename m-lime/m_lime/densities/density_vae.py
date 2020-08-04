@@ -8,6 +8,7 @@ from m_lime.densities.base import Density
 
 class DensityVAE(Density):
     def __init__(self, input_dim=None, verbose=False, model=None, **kwargs):
+        super().__init__()
         if model is None:
             self.model = ModelVAE(input_dim=input_dim, verbose=verbose, **kwargs)
         else:
