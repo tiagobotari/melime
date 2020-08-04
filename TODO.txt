@@ -1,10 +1,11 @@
 [ ] Update README with proper description of the project
 [ ] Finish refactor from `density_lime` to `m_lime`. Almost all the notebooks doesn't work at the moment!
 [ ] Implement tree explainers.
-[ ] Fix nmist -> MNIST spelling mistake. It burns in my eyes ;-)
+[X] Fix nmist -> MNIST spelling mistake. It burns in my eyes ;-)
 
 
 
 Clean-up potential deletes:
  - playground/kde/cifar10.ipynb - along with model path ../models/model_cifar_net.pth
+ - playground/tabular ? Empty folder
  - 
