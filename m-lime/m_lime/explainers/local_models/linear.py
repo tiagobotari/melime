@@ -29,52 +29,30 @@ class SGDRegressorMod(LocalModelLinear):
         features_names,
         r,
         tol_convergence=0.001, 
-        loss="squared_loss",
-        penalty="l2",
         l1_ratio=0.0,
-        fit_intercept=True,
+        alpha=0.003,
         max_iter=100000,
-        tol=1e-05,
-        shuffle=True,
-        verbose=0,
-        epsilon=0.1,
-        random_state=None,
+        tol=0.001,   
         learning_rate="adaptive",
         eta0=0.0005,
-        power_t=0.25,
-        early_stopping=False,
-        validation_fraction=0.1,
         n_iter_no_change=100,
-        warm_start=False,
         average=100,
-        alpha=0.003
-        ):
+        **kwargs):
         super().__init__(x_explain, y_p_explain, features_names, r, tol_convergence)
         self.model = SGDRegressor(
-            loss=loss,
-            penalty=penalty,
             l1_ratio=l1_ratio,
-            fit_intercept=fit_intercept,
             max_iter=max_iter,
             tol=tol,
-            shuffle=shuffle,
-            verbose=verbose,
-            epsilon=epsilon,
-            random_state=random_state,
             learning_rate=learning_rate,
             eta0=eta0,
-            power_t=power_t,
-            early_stopping=early_stopping,
-            validation_fraction=validation_fraction,
             n_iter_no_change=n_iter_no_change,
-            warm_start=False,
             average=average,
-            alpha=alpha
+            alpha=alpha,
+            **kwargs
         )
         self.weight = None
 
     def partial_fit(self, x_set, y_set, sample_weight=None):
-        # sample_weight = self.gaussian.pdf(x_set)
         self.model.partial_fit(x_set, y_set, sample_weight=sample_weight)
 
 
