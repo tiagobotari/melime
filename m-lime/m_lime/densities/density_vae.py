@@ -59,18 +59,15 @@ class DensityVAE(Density):
 
 
 class ModelVAE(object):
-    def __init__(self, input_dim, nodes_dim=400, n_layers=2, latent_dim=12, cuda=True, verbose=False):
+    def __init__(self, input_dim, nodes_dim=400, n_layers=2, latent_dim=12, device='cpu', batch_size=128, verbose=False):
         self.verbose = verbose
         self.latent_dim = latent_dim
         self.input_dim = input_dim
         self.n_layers = n_layers
         self.nodes_dim = nodes_dim
 
-        self.batch_size = 128
-        self.cuda = cuda
-        self.kwargs = {"num_workers": 1, "pin_memory": True} if cuda else {}
-
-        self.device = torch.device("cuda" if self.cuda else "cpu")
+        self.batch_size = batch_size
+        self.device = device
         self.device_cpu = torch.device("cpu")
 
         self.model = VAE(
@@ -98,15 +95,16 @@ class ModelVAE(object):
             if self.verbose:
                 if batch_idx % self.log_interval == 0:
                     print(
-                        "Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}".format(
+                        "\rTrain Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}".format(
                             epoch,
                             batch_idx * len(data),
                             len(train_loader.dataset),
                             100.0 * batch_idx / len(train_loader),
                             loss.item() / len(data),
-                        )
+                        ),
+                        end=""
                     )
-
+        print()
         if self.verbose:
             print("Epoch: {} - Mean loss: {:.4f}".format(epoch, train_loss / len(train_loader.dataset)))
 
