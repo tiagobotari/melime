@@ -1,0 +1,4 @@
+[ ] Update README with proper description of the project
+[ ] Finish refactor from `density_lime` to `m_lime`. Almost all the notebooks doesn't work at the moment!
+[ ] Implement tree explainers.
+[ ] 
