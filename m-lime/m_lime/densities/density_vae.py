@@ -20,12 +20,13 @@ class DensityVAE(Density):
         return self
 
     def load_manifold(self, path):
-        self.model.model = torch.load(path)
+        checkpoint = torch.load(path)
+        self.model.model.load_state_dict(checkpoint['state_dict'])
         self.model.model.eval()
         return self
 
     def save_manifold(self, path):
-        torch.save(self.model.model, path)
+        torch.save({'state_dict': self.model.model.state_dict()} , path)
 
     def sample_radius(self, x_exp, r=None, n_samples=1000, random_state=None):
         with torch.no_grad():
@@ -33,29 +34,25 @@ class DensityVAE(Density):
             mu_p, log_var_p = self.model.model.encode(x_exp_tensor.reshape(-1))
             ones = torch.ones(n_samples).to(self.model.device)
             mu_m = torch.ger(ones, mu_p)
-            # TODO: TB: I am not sure if is better or not multiply the distance r by std_r.
-            # TODO: TB: preliminary tests indicate that is better to not use std_r.
-            # std_r = torch.exp(0.5 * log_var_p).to(self.model.device)
-            noise = torch.rand(n_samples, self.model.latent_dim).to(self.model.device) * r  # std_r *
-            mu_m = mu_m + noise
+            std_r = torch.exp(0.5 * log_var_p).to(self.model.device)
+            noise = (torch.rand(n_samples, self.model.latent_dim).to(self.model.device)-0.5)*r
+            # samples_z = torch.normal(mu_m, std_r, out=self.model.latent_dim)
+            # mu_m = mu_m + noise
             z = self.model.model.reparameterize(mu_m, log_var_p)
+            z = z + noise
             x_p = self.model.model.decode(z)
             x_sample = x_p.reshape(-1, self.model.input_dim).to(self.model.device_cpu).detach().numpy()
-            # Clean cache torch.
-            # TODO: TB: what is the best practice?
+        # Clean cache torch.
+        # TODO: TB: what is the best practice?
         del x_p
         del noise
         del mu_m
         torch.cuda.empty_cache()
-
         return x_sample
 
     def sample(self, n_samples=1, random_state=None):
         # TODO: Need to be implemented.
         pass
-        # x_sample_pca = self.manifold.sample(n_samples=n_samples, random_state=random_state)
-        # x_sample = self.pca.inverse_transform(x_sample_pca)
-        # return x_sample
 
 
 class ModelVAE(object):
@@ -104,7 +101,7 @@ class ModelVAE(object):
                         ),
                         end=""
                     )
-        print()
+                    print()
         if self.verbose:
             print("Epoch: {} - Mean loss: {:.4f}".format(epoch, train_loss / len(train_loader.dataset)))
 
@@ -185,76 +182,3 @@ class VAE(nn.Module):
             input_dim = nodes_dim
 
         return layers
-
-
-if __name__ == "__main__":
-    from torchvision import datasets, transforms
-    import torchvision
-    import torchvision.transforms as transforms
-
-    CUDA = True
-    SEED = 1
-    BATCH_SIZE = 128
-    LOG_INTERVAL = 10
-    EPOCHS = 10
-    no_of_sample = 10
-
-    # connections through the autoencoder bottleneck
-    # in the pytorch VAE example, this is 20
-    ZDIMS = 20
-
-    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-    folder_data = "/home/tiago/projects/density-lime/src/playground/kde/data"
-    trainset = torchvision.datasets.CIFAR10(root=folder_data, train=True, download=True, transform=transform)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=4, shuffle=True, num_workers=2)
-
-    testset = torchvision.datasets.CIFAR10(root=folder_data, train=False, download=True, transform=transform)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=4, shuffle=False, num_workers=2)
-
-    classes = ("plane", "car", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck")
-
-    density = DensityVAE(input_dim=3072, verbose=True)
-    density.fit(trainloader)
-
-    exit()
-    from torchvision import datasets, transforms
-
-    epochs = 5
-    cuda = True
-    batch_size = 128
-    kwargs = {"num_workers": 1, "pin_memory": True} if cuda else {}
-
-    train_loader = torch.utils.data.DataLoader(
-        datasets.MNIST("../data", train=True, download=True, transform=transforms.ToTensor()),
-        batch_size=batch_size,
-        shuffle=True,
-        **kwargs
-    )
-    test_loader = torch.utils.data.DataLoader(
-        datasets.MNIST("../data", train=False, transform=transforms.ToTensor()),
-        batch_size=batch_size,
-        shuffle=True,
-        **kwargs
-    )
-
-    density = DensityVAE(input_dim=784, verbose=True)
-    density.fit(train_loader, epochs=4)
-
-    for data in test_loader:
-        x_1 = data
-        break
-
-    x_img = x_1[0][1].reshape(28, 28)
-    x_img_plot = x_img.cpu().numpy()
-    # model = ModelVAE(input_dim=784, n_layers=1)
-    # model.train_epochs(epochs=10)
-    density.sample_radius(x_exp=x_img_plot.reshape(-1, 784), r=10, n_samples=1, random_state=None)
-
-    import matplotlib.pyplot as plt
-
-    # img = sample.view(64, 1, 28, 28)
-    fig, ax1 = plt.subplots(1, 1)
-    # ax1.imshow(img[50][0], interpolation = 'none')
-    ax1.imshow(x_img_plot, interpolation="none")
-    # ax1.set_title('Digit: {}'.format(y))
-    plt.show()
