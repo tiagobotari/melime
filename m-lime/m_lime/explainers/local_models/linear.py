@@ -30,7 +30,6 @@ class SGDRegressorMod(LocalModelLinear):
         r,
         tol_convergence=0.001, 
         l1_ratio=0.0,
-        alpha=0.003,
         max_iter=100000,
         tol=0.001,   
         learning_rate="adaptive",
@@ -47,7 +46,6 @@ class SGDRegressorMod(LocalModelLinear):
             eta0=eta0,
             n_iter_no_change=n_iter_no_change,
             average=average,
-            alpha=alpha,
             **kwargs
         )
         self.weight = None
