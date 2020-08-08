@@ -1,16 +1,17 @@
 import itertools
 import numpy as np
+import matplotlib
 from matplotlib import pyplot as plt
-
+from matplotlib import cm
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 class ImagePlot(object):
     @classmethod
-    def plot_importance(self, importance, shape=None, standardization=False):
+    def plot_importance_negative_positive(cls, importance, shape=None, standardization=False):
         # TODO: Normalize the importance, give the option
         # TODO: add a variable shape
         if standardization:
             importance = importance / np.std(importance)
-
         if shape is None:
             n_importance = importance.shape
             n_size = int(np.sqrt(n_importance))
@@ -18,36 +19,107 @@ class ImagePlot(object):
 
         max_importance = np.max(importance)
         min_importance = np.min(importance)
-
+        max_scale = np.max(np.abs([max_importance, max_importance]))
+        
         importance = importance.reshape(shape)
-        # importance = np.transpose(importance)
 
         fig, ax = plt.subplots(1, 3, figsize=(20, 10))
         fig.subplots_adjust(left=0.02, bottom=0.06, right=0.95, top=0.94, wspace=0.1)
         ax.reshape(-1)
 
-        cp_importance = self.plot_importance_(importance=importance, title="General Importance", fig=fig, ax=ax[0])
+        cmap_ = cls.color_map()
+        cp_importance = cls.plot_importance_(
+            importance=importance, 
+            title="General Importance", 
+            fig=fig, ax=ax[0],
+            cmap=cmap_,
+            vmax=max_scale, 
+            vmin=-max_scale
+        )
 
         positive = importance.copy()
         positive[positive < 0] = 0
-        self.plot_importance_(importance=positive, title="Positive Contribution", fig=fig, ax=ax[1])
+        cls.plot_importance_(
+            importance=positive,
+            title="Positive Contribution", 
+            fig=fig, ax=ax[1], 
+            cmap=cmap_,
+            vmax=max_scale, 
+            vmin=-max_scale
+        )
 
         negative = importance.copy()
         negative[negative > 0] = 0
-        self.plot_importance_(importance=negative, title="Negative Contribution", fig=fig, ax=ax[2])
+        cls.plot_importance_(
+            importance=negative, 
+            title="Negative Contribution", 
+            fig=fig, ax=ax[2],
+            cmap=cmap_, 
+            vmax=max_scale, 
+            vmin=-max_scale
+        )
+        # left=0.02, bottom=0.06, right=0.95, top=0.94, wspace=0.1
+       
+        return fig, ax
+    
+    @classmethod
+    def plot_importance(cls, importance, shape=None, standardization=False):
+        # TODO: Normalize the importance, give the option
+        # TODO: add a variable shape
+        if standardization:
+            importance = importance / np.std(importance)
+        if shape is None:
+            n_importance = importance.shape
+            n_size = int(np.sqrt(n_importance))
+            shape = (n_size, n_size)
 
-        fig.subplots_adjust(right=0.9)
-        cbar_ax = fig.add_axes([0.95, 0.25, 0.04, 0.5])
-        fig.colorbar(cp_importance, cax=cbar_ax)
+        max_importance = np.max(importance)
+        min_importance = np.min(importance)
+        max_scale = np.max(np.abs([max_importance, max_importance]))
+        
+        importance = importance.reshape(shape)
+
+        fig, ax = plt.subplots(figsize=(5, 5))
+        fig.subplots_adjust(left=0.02, bottom=0.06, right=0.95, top=0.94, wspace=0.1)
+
+        cmap_ = cls.color_map()
+        cp_importance = cls.plot_importance_(
+            importance=importance, 
+            title="General Importance", 
+            fig=fig, ax=ax,
+            cmap=cmap_,
+            vmax=max_scale, 
+            vmin=-max_scale
+        )
+
         return fig, ax
 
     @staticmethod
+    def color_map():
+        colors = cm.get_cmap('bwr', 200)
+        scale_color = [*range(0, 50, 1)]+[*range(50, 80, 8)]
+        scale_color1 = [*range(120, 120+30, 5)]+[*range(120+30, 200, 1)]
+        newcolors = colors(scale_color+[*range(98,103)]+scale_color1)
+        newcmp = matplotlib.colors.ListedColormap(newcolors)
+        return newcmp
+
+    @staticmethod
     def plot_importance_(importance, title, fig, ax, **kwarg):
-        ax.set_title(title)
-        plt.setp(ax.get_xticklabels(), visible=False)
-        plt.setp(ax.get_yticklabels(), visible=False)
-        cp = ax.imshow(importance, interpolation="none", cmap="jet", **kwarg)  # , origin='lower')
-        # fig.colorbar(cp, ax=ax, fraction=0.046, pad=0.01)
+        ax.set_title(title, fontsize=20)
+        ax.set_xticks([], [])
+        ax.set_yticks([], [])
+        # plt.setp(ax.get_xticklabels(), visible=False)
+        # plt.setp(ax.get_yticklabels(), visible=False)
+        cp = ax.imshow(
+                importance,
+                interpolation="none",
+                norm=matplotlib.colors.DivergingNorm(0),  
+                **kwarg
+        )
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cbar = plt.colorbar(cp, cax=cax)  #, fraction=0.046, pad=0.01)
+        cbar.ax.tick_params(labelsize=15)
         return cp
 
 
@@ -232,3 +304,55 @@ if __name__ == "__main__":
     # plt.colorbar(cp)
     plt.legend()
     plt.show()
+
+
+def shiftedColorMap(cmap, start=0, midpoint=0.5, stop=1.0, name='shiftedcmap'):
+    '''
+    Function to offset the "center" of a colormap. Useful for
+    data with a negative min and positive max and you want the
+    middle of the colormap's dynamic range to be at zero.
+    origin: https://stackoverflow.com/questions/7404116/defining-the-midpoint-of-a-colormap-in-matplotlib
+    Input
+    -----
+      cmap : The matplotlib colormap to be altered
+      start : Offset from lowest point in the colormap's range.
+          Defaults to 0.0 (no lower offset). Should be between
+          0.0 and `midpoint`.
+      midpoint : The new center of the colormap. Defaults to 
+          0.5 (no shift). Should be between 0.0 and 1.0. In
+          general, this should be  1 - vmax / (vmax + abs(vmin))
+          For example if your data range from -15.0 to +5.0 and
+          you want the center of the colormap at 0.0, `midpoint`
+          should be set to  1 - 5/(5 + 15)) or 0.75
+      stop : Offset from highest point in the colormap's range.
+          Defaults to 1.0 (no upper offset). Should be between
+          `midpoint` and 1.0.
+    '''
+    cdict = {
+        'red': [],
+        'green': [],
+        'blue': [],
+        'alpha': []
+    }
+
+    # regular index to compute the colors
+    reg_index = np.linspace(start, stop, 257)
+
+    # shifted index to match the data
+    shift_index = np.hstack([
+        np.linspace(0.0, midpoint, 128, endpoint=False), 
+        np.linspace(midpoint, 1.0, 129, endpoint=True)
+    ])
+
+    for ri, si in zip(reg_index, shift_index):
+        r, g, b, a = cmap(ri)
+
+        cdict['red'].append((si, r, r))
+        cdict['green'].append((si, g, g))
+        cdict['blue'].append((si, b, b))
+        cdict['alpha'].append((si, a, a))
+
+    newcmap = matplotlib.colors.LinearSegmentedColormap(name, cdict)
+    plt.register_cmap(cmap=newcmap)
+
+    return newcmap
