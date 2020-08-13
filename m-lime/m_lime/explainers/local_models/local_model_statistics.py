@@ -1,18 +1,18 @@
 import numpy as np
 
-from m_lime.explainers.local_models.base import LocalModelBase
+from m_lime.explainers.local_models.local_model_base import LocalModelBase
 
 
 class BasicStatistics(LocalModelBase):
     """
     Basic descriptive statistics for generating explanation.
     """
-    def __init__(self, x_explain, y_p_explain, features_names, r=None, tol_convergence=0.001):
-        super().__init__(x_explain, y_p_explain, features_names, r, tol_convergence)
+    def __init__(self, x_explain, y_p_explain, features_names, r=None, tol_convergence=0.001, save_samples=False):
+        super().__init__(x_explain, y_p_explain, features_names, r, tol_convergence, save_samples)
         self.values = {}
         # self.values = {e: [] for e in self.features_names}
 
-    def measure_convergence(self):
+    def measure_convergence(self, chi_set=None, y_true=None):
         return self._measure_convergence(self._coef_mean)
 
     @property
@@ -28,7 +28,7 @@ class BasicStatistics(LocalModelBase):
         results = self.calculate()
         return results
 
-    def partial_fit(self, x_set, y_set):
+    def partial_fit(self, x_set, y_set, weight_set=None):
         # TODO: I need to improve this. Maybe put a matrix here with the positions.
         for x_i, y_i in zip(x_set, y_set):
             if x_i[0] in self.values:
