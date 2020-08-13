@@ -1,9 +1,9 @@
 from enum import Enum
 import numpy as np
 
-from m_lime.densities.base import Density
-from m_lime.densities.models.gensim_cbow import GensimCBOW
-from m_lime.densities.models.torch_word2vec import TorchCBOW
+from m_lime.generators.gen_base import GenBase
+from m_lime.generators.models.gensim_cbow import GensimCBOW
+from m_lime.generators.models.torch_word2vec import TorchCBOW
 
 
 models_available = {"gensim_CBOW": GensimCBOW, "torch_CBOW": TorchCBOW}
@@ -14,7 +14,7 @@ class ModelsAvailable(Enum):
     TorchCBOW = "torch_CBOW"
 
 
-class DensityWord2Vec(Density):
+class GenWord2Vec(GenBase):
     """
     Density estimation using word2vec.
     """

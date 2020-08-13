@@ -1,15 +1,16 @@
+"""
+TODO: Probabilistic PCA? MiniBatchDictionaryLearning? MiniBatchSparsePCA? LinearDiscriminantAnalysis?
+TODO: Independent Component Analysis
+"""
+
 from sklearn.decomposition import IncrementalPCA, KernelPCA
 from sklearn.manifold import Isomap
 
-from m_lime.densities.base import Density
-from m_lime.densities.density_kde import DensityKDE
+from m_lime.generators.gen_base import GenBase
+from m_lime.generators.kde_gen import KDEGen
 
 
-# TODO: Implement Kernel PCA?
-#  Probabilistic PCA? MiniBatchDictionaryLearning? MiniBatchSparsePCA? LinearDiscriminantAnalysis?
-#  Independent Component Analysis
-# TODO: Incorporate this as a children of KernelDensityExp or maybe create a abstract class. I am not sure.
-class DensityKDEPCA(Density):
+class KDEPCAGen(GenBase):
     def __init__(self, kernel="gaussian", bandwidth=0.1, n_components=None, kde_params={}):
         super().__init__()
         self.pca = IncrementalPCA(n_components=n_components)
@@ -21,7 +22,7 @@ class DensityKDEPCA(Density):
 
     def fit(self, x):
         x_pca = self.pca.fit_transform(x)
-        self.manifold = DensityKDE(kernel=self.kernel, bandwidth=self.bandwidth, **self.kde_params).fit(x_pca)
+        self.manifold = KDEGen(kernel=self.kernel, bandwidth=self.bandwidth, **self.kde_params).fit(x_pca)
         return self
 
     def sample_radius(self, x_exp, n_min_kernels=20, r=None, n_samples=1, random_state=None):
@@ -38,7 +39,7 @@ class DensityKDEPCA(Density):
         return x_sample
 
 
-class DensityKDEKPCA(Density):
+class KDEKPCAGen(GenBase):
     def __init__(self, kernel="gaussian", bandwidth=0.1, n_components=None, kernel_pca="cosine"):
         super().__init__()
         # kernel: “linear” | “poly” | “rbf” | “sigmoid” | “cosine” |
@@ -49,7 +50,7 @@ class DensityKDEKPCA(Density):
 
     def fit(self, x):
         x_pca = self.pca.fit_transform(x)
-        self.manifold = DensityKDE(kernel=self.kernel, bandwidth=self.bandwidth).fit(x_pca)
+        self.manifold = KDEGen(kernel=self.kernel, bandwidth=self.bandwidth).fit(x_pca)
         return self
 
     def sample_radius(self, x_exp, n_min_kernels=20, r=None, n_samples=1, random_state=None):
@@ -66,22 +67,20 @@ class DensityKDEKPCA(Density):
         return x_sample
 
 
-# TODO: Isomap has no inverse transformation, maybe we can came up with some solution for that.
-#  I think this could be very useful in the future.
-#  Look the the work: Inverse Methods for Manifold Learning from Kathleen Kay
-class DensityKDEIsomap(Density):
+class KDEIsomapGen(GenBase):
+    # TODO: Isomap has no inverse transformation, maybe we can solve that in the future.
+    # TODO: Look the the work: Inverse Methods for Manifold Learning from Kathleen Kay
     def __init__(self, kernel="gaussian", bandwidth=0.1, n_components=None, n_neighbors=20):
         super().__init__()
-        # TODO: Optimization note: Isomap creates a tree structure, I do not need to recalculate that
-        #  when creating the KernelDensityExp
         self.transformer = Isomap(n_neighbors, n_components=n_components)
         self.bandwidth = bandwidth
         self.kernel = kernel
         self.manifold = None
+        raise NotImplementedError
 
     def fit(self, x):
         x_pca = self.transformer.fit_transform(x)
-        self.manifold = DensityKDE(kernel=self.kernel, bandwidth=self.bandwidth).fit(x_pca)
+        self.manifold = KDEGen(kernel=self.kernel, bandwidth=self.bandwidth).fit(x_pca)
         return self
 
     def sample_radius(self, x_exp, n_min_kernels=20, r=None, n_samples=1, random_state=None):
@@ -96,9 +95,3 @@ class DensityKDEIsomap(Density):
         x_sample_pca = self.manifold.sample(n_samples=n_samples, random_state=random_state)
         x_sample = self.transformer.inverse_transform(x_sample_pca)
         return x_sample
-
-
-if __name__ == "__main__":
-    import torchvision.models.quantization as models
-
-    model_fe = models.resnet18(pretrained=True, progress=True, quantize=True)

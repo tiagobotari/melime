@@ -3,10 +3,10 @@ import torch.utils.data
 from torch import nn, optim
 from torch.nn import functional
 
-from m_lime.densities.base import Density
+from m_lime.generators.gen_base import GenBase
 
 
-class DensityVAE(Density):
+class VAEGen(GenBase):
     def __init__(self, input_dim=None, verbose=False, model=None, **kwargs):
         super().__init__()
         if model is None:
@@ -21,12 +21,12 @@ class DensityVAE(Density):
 
     def load_manifold(self, path):
         checkpoint = torch.load(path)
-        self.model.model.load_state_dict(checkpoint['state_dict'])
+        self.model.model.load_state_dict(checkpoint["state_dict"])
         self.model.model.eval()
         return self
 
     def save_manifold(self, path):
-        torch.save({'state_dict': self.model.model.state_dict()} , path)
+        torch.save({"state_dict": self.model.model.state_dict()}, path)
 
     def sample_radius(self, x_exp, r=None, n_samples=1000, random_state=None):
         with torch.no_grad():
@@ -35,9 +35,7 @@ class DensityVAE(Density):
             ones = torch.ones(n_samples).to(self.model.device)
             mu_m = torch.ger(ones, mu_p)
             std_r = torch.exp(0.5 * log_var_p).to(self.model.device)
-            noise = (torch.rand(n_samples, self.model.latent_dim).to(self.model.device)-0.5)*r
-            # samples_z = torch.normal(mu_m, std_r, out=self.model.latent_dim)
-            # mu_m = mu_m + noise
+            noise = (torch.rand(n_samples, self.model.latent_dim).to(self.model.device) - 0.5) * r
             z = self.model.model.reparameterize(mu_m, log_var_p)
             z = z + noise
             x_p = self.model.model.decode(z)
@@ -56,7 +54,9 @@ class DensityVAE(Density):
 
 
 class ModelVAE(object):
-    def __init__(self, input_dim, nodes_dim=400, n_layers=2, latent_dim=12, device='cpu', batch_size=128, verbose=False):
+    def __init__(
+        self, input_dim, nodes_dim=400, n_layers=2, latent_dim=12, device="cpu", batch_size=128, verbose=False
+    ):
         self.verbose = verbose
         self.latent_dim = latent_dim
         self.input_dim = input_dim
@@ -99,7 +99,7 @@ class ModelVAE(object):
                             100.0 * batch_idx / len(train_loader),
                             loss.item() / len(data),
                         ),
-                        end=""
+                        end="",
                     )
                     print()
         if self.verbose:

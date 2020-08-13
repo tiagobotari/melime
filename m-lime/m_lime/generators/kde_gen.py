@@ -2,33 +2,18 @@ from functools import partial
 import numpy as np
 
 from scipy.special import gammainc
-from sklearn.neighbors.kde import KernelDensity
-# from sklearn.neighbors import KernelDensity
+from sklearn.neighbors import KernelDensity
 from sklearn.utils.extmath import row_norms
 from sklearn.utils import check_random_state
 from sklearn.model_selection import GridSearchCV
 from scipy.stats import multivariate_normal
 
-from m_lime.densities.base import Density
+from m_lime.generators.gen_base import GenBase
 
 
-def gaussian(x, kernel_width):
-    """
-    Returr a Normal density distribution centered in a mu.
-    :param x: data to
-    :param mu: center of the Gaussian.
-    :param sigma: deviation of Gaussian function
-    :return:
-    """
-    sigma = kernel_width
-    normalize = (sigma * np.sqrt(2.0 * np.pi)) ** -1
-    return normalize * np.exp(-0.5 * x ** 2 / sigma ** 2)
-
-
-class DensityKDE(Density):
+class KDEGen(GenBase):
     """
     Modification of KenelDensity from sklearn do sample data around a specific point.
-    # TODO: I do not remember what Exp mean in the name, maybe a better name can be suggested.
     """
 
     def __init__(self, search_best=True, verbose=True, **kwargs):
@@ -44,7 +29,7 @@ class DensityKDE(Density):
         self, x, y=None, sample_weight=None,
     ):
         if self.search_best:
-            bandwidths = np.linspace(0.01, 0.5, 10)
+            bandwidths = np.linspace(0.005, 0.5, 20)
             grid = GridSearchCV(estimator=self.manifold, param_grid={"bandwidth": bandwidths}, cv=5, n_jobs=-1)
             grid.fit(x)
             self.manifold = grid.best_estimator_
@@ -54,42 +39,10 @@ class DensityKDE(Density):
                 print("Best Parameter for the KDE:")
                 print(best_params_)
                 print("Score:", grid.best_score_)
-                # print('CV:')
-                # print(grid.cv_results_)
             return self
         else:
             self.manifold.fit(x, y=None, sample_weight=None)
         return self
-
-    def sub_kde(self, x_exp, r=None, kernel=None, kernel_width=None):
-        """
-        Routine that return a KDE with selected r radius.
-        :param x_exp:
-        :param r:
-        :param sample_weight:
-        :return:
-        """
-        if kernel_width is None:
-            kernel_width = 0.1
-        if r is None:
-            r = kernel_width * 4.0
-        if kernel is None:
-            kernel = gaussian
-
-        ind_ = self.manifold.tree_.query_radius(x_exp, r=r, return_distance=False)[0].astype(int)  # .tolist()
-        # TODO: TB: Make the selection from the tree structure.
-        # TODO: TB: I had implemented a version que transform the tree structure to numpy array
-        # TODO: TB: and then do the selection. This is not a good strategy.
-        # data = np.asarray(self.tree_.data[ind_])
-        x = np.asarray(self.manifold.tree_.data)[ind_]
-        if x.shape[0] == 0:
-            return None
-
-        kernel_ = partial(kernel, kernel_width=kernel_width)
-
-        d = np.sqrt(np.sum((x - x_exp) ** 2, axis=1))
-        sample_weight = kernel_(d)
-        return DensityKDE(kernel="gaussian", bandwidth=self.bandwidth).fit(x, sample_weight=sample_weight)
 
     def predict(self, x, kernel_width=None):
         """
@@ -103,6 +56,8 @@ class DensityKDE(Density):
     def sample_radius(self, x_exp, n_min_kernels=10, r=None, n_samples=1, random_state=None):
         """Generate random samples from the model.
 
+        This is a modification of the method sample from Sklearn KDE.
+        This modification allows sample instance inside a ball of radius r.
         Currently, this is implemented only for gaussian and tophat kernels.
 
         Parameters
@@ -123,8 +78,7 @@ class DensityKDE(Density):
         X : array_like, shape (n_samples, n_features)
             List of samples.
         """
-        # TODO: TB: This TODO is from Sklearn
-        # TODO: implement sampling for other valid kernel shapes
+        # TODO: implement sampling for other valid kernel shapes, This TODO is from Sklearn
         if self.manifold.kernel not in ["gaussian", "tophat"]:
             raise NotImplementedError()
 
@@ -142,10 +96,9 @@ class DensityKDE(Density):
             ind_ = self.manifold.tree_.query_radius(x_exp, r=r, return_distance=False)[0].astype(int)
 
         # TODO: TB: Make the selection from the tree structure.
-        # TODO: TB: I had implemented a version que transform the tree structure to numpy array
-        # TODO: TB: and then do the selection. This is not a good strategy.
-        # data = np.asarray(self.tree_.data[ind_])
-        data = np.asarray(self.manifold.tree_.data)  # TODO: I am coping all the tree. Not good!
+        # TODO: TB: For now the three is transformed into numpy array, it is slow.
+        # TODO: data = np.asarray(self.tree_.data[ind_])
+        data = np.asarray(self.manifold.tree_.data)  # TODO: Coping all the three. Not good!
         data = data[ind_]
         if data.shape[0] == 0:
             return np.empty(data.shape)
