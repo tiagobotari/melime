@@ -14,7 +14,7 @@ class ModelsAvailable(Enum):
     TorchCBOW = "torch_CBOW"
 
 
-class GenWord2Vec(GenBase):
+class Word2VecGen(GenBase):
     """
     Density estimation using word2vec.
     """
