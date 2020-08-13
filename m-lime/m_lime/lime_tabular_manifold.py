@@ -9,8 +9,8 @@ import scipy as sp
 from matplotlib import pyplot as plt
 
 from lime.lime_tabular import *
-from m_lime.densities.density_kde import DensityKDE
-from m_lime.densities.density_kde_pca import DensityKDEPCA, DensityKDEKPCA
+from m_lime.generators.kde_gen import KDEGen
+from m_lime.generators.kdepca_gen import KDEPCAGen, KDEKPCAGen
 
 
 class LimeTabularExplainerManifold(LimeTabularExplainer):
@@ -205,17 +205,17 @@ class LimeTabularExplainerManifold(LimeTabularExplainer):
         self.bandwidth = 0.1
 
         if manifold == 'kde':
-            self.manifold = DensityKDE(
+            self.manifold = KDEGen(
             kernel='gaussian', bandwidth=self.bandwidth, **manifold_params).fit(x)
         elif manifold == 'kde-pca':
             # TODO: Chose of n_components is arbitrary.
             n_components = int(np.sqrt(x.shape[1]))
-            self.manifold = DensityKDEPCA(
+            self.manifold = KDEPCAGen(
                 kernel='gaussian', bandwidth=self.bandwidth, n_components=n_components, **manifold_params).fit(x)
         elif manifold == 'kde-kpca':
             # TODO: Chose of n_components is arbitrary.
             n_components = int(np.sqrt(x.shape[1]))
-            self.manifold = DensityKDEKPCA(
+            self.manifold = KDEKPCAGen(
                 kernel='gaussian', bandwidth=self.bandwidth, n_components=n_components, **manifold_params).fit(x)
         else:
             raise Exception('The manifold value should be a valid options: kde, kde-pca, and kde-kpca.')
