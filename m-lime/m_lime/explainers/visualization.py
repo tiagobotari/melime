@@ -122,6 +122,18 @@ class ImagePlot(object):
         cbar.ax.tick_params(labelsize=15)
         return cp
 
+    @classmethod
+    def plot_instances(cls, ax=None, x_=None, y_=None):
+        if ax is None:
+            fig, ax = plt.subplots(figsize=(5, 5))
+        ax.set_xticks([], [])
+        ax.set_yticks([], [])
+        ax.set_title(y_, fontsize=18)
+        colors = matplotlib.cm.get_cmap('Greys', 200)
+        scale_color = [*range(0, 100, 8)]+[*range(100, 200, 1)]
+        newcolors = colors(scale_color)
+        newcmp = matplotlib.colors.ListedColormap(newcolors)
+        return ax.imshow(x_, interpolation = 'none', cmap=newcmp)
 
 class GridPlot(object):
     @classmethod
