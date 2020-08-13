@@ -7,7 +7,7 @@ from m_lime.explainers.explainer import Explainer
 from m_lime.explainers.explainer import ConFavExaples
 
 
-class ExplainStatistics(Explainer):
+class ExplainerStatistics(Explainer):
     def __init__(
         self,
         model_predict,
@@ -27,5 +27,5 @@ class ExplainStatistics(Explainer):
         :param linear_model: linear model that will be used to generate the explanation.
         See standard_linear_models variable.
         """
-        super().__init__(model_predict, density, local_model, random_state, verbose)
+        super().__init__(model_predict, density, local_model, feature_names, random_state, verbose)
 

@@ -7,10 +7,10 @@ class BasicStatistics(LocalModelBase):
     """
     Basic descriptive statistics for generating explanation.
     """
-    def __init__(self, x_explain, y_p_explain, features_names, r=None, tol_convergence=0.001, save_samples=False):
-        super().__init__(x_explain, y_p_explain, features_names, r, tol_convergence, save_samples)
+    def __init__(self, x_explain, y_p_explain, feature_names, r=None, tol_convergence=0.001, save_samples=False):
+        super().__init__(x_explain, y_p_explain, feature_names, r, tol_convergence, save_samples)
         self.values = {}
-        # self.values = {e: [] for e in self.features_names}
+        # self.values = {e: [] for e in self.feature_names}
 
     def measure_convergence(self, chi_set=None, y_true=None):
         return self._measure_convergence(self._coef_mean)
