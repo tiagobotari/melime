@@ -3,11 +3,10 @@ import torch.utils.data
 from torch import nn, optim
 from torch.nn import functional
 
+from m_lime.generators.gen_base import GenBase
 
-from m_lime.densities.base_density import Density
 
-
-class DensityCNNVAE(Density):
+class CNNVAEGen(GenBase):
     def __init__(self, image_channels, latent_dim, cuda=True, verbose=False, **kwargs):
         self.model = ModelVAE(image_channels, latent_dim=latent_dim, cuda=cuda, verbose=verbose, **kwargs)
         self.manifold = None
@@ -30,11 +29,9 @@ class DensityCNNVAE(Density):
             mu_p, log_var_p = self.model.model.encode(x_exp_tensor)
             ones = torch.ones(n_samples).to(self.model.device)
             mu_m = torch.ger(ones, mu_p.view(-1))
-            # TODO: TB: I am not sure if is better or not multiply the distance r by std_r.
-            # TODO: TB: preliminary tests indicate that is better to not use std_r.
-            # std_r = torch.exp(0.5 * log_var_p).to(self.model.device)
-            noise = torch.rand(n_samples, self.model.latent_dim).to(self.model.device) * r  # std_r *
-            mu_m = mu_m + noise
+            noise = (torch.rand(n_samples, self.model.latent_dim).to(self.model.device)-0.5)*r
+            z = self.model.model.reparameterize(mu_m, log_var_p)
+            z = z + noise
             z = self.model.model.reparameterize(mu_m, log_var_p)
             x_sample = self.model.model.decode(z)
 
@@ -49,22 +46,16 @@ class DensityCNNVAE(Density):
     def sample(self, n_samples=1, random_state=None):
         # TODO: Need to be implemented.
         pass
-        # x_sample_pca = self.manifold.sample(n_samples=n_samples, random_state=random_state)
-        # x_sample = self.pca.inverse_transform(x_sample_pca)
-        # return x_sample
 
 
 class ModelVAE(object):
-    def __init__(self, image_channels, latent_dim=256, cuda=True, verbose=False, **kwargs):
+    def __init__(self, image_channels, latent_dim=256, device="cpu", batch_size=128, verbose=False, **kwargs):
         self.verbose = verbose
         self.latent_dim = latent_dim
         self.image_channels = image_channels
 
-        self.batch_size = 128
-        self.cuda = cuda
-        self.kwargs = {"num_workers": 1, "pin_memory": True} if cuda else {}
-
-        self.device = torch.device("cuda" if self.cuda else "cpu")
+        self.batch_size = batch_size
+        self.device = device
         self.device_cpu = torch.device("cpu")
 
         self.model = VAE(image_channels=self.image_channels, latent_dim=latent_dim)
@@ -253,62 +244,3 @@ class VAE(nn.Module):
         # 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
         kld = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp())
         return bce + kld
-
-
-if __name__ == "__main__":
-    import torch
-    import torch.utils.data
-    from torchvision import datasets, transforms
-    from matplotlib import pyplot as plt
-    import numpy as np
-    import torchvision
-
-    epochs = 10
-    cuda = torch.cuda.is_available()
-    batch_size = 128
-    kwargs = {"num_workers": 1, "pin_memory": True} if cuda else {}
-    device = torch.device("cuda" if cuda else "cpu")
-    device_cpu = torch.device("cpu")
-
-    transform_data = transforms.Compose([transforms.Resize(32), transforms.ToTensor()])
-
-    folder_data = "/media/tiago/tiagobotari/data"
-    train_loader = torch.utils.data.DataLoader(
-        datasets.MNIST(folder_data, train=True, download=False, transform=transform_data),
-        batch_size=batch_size,
-        shuffle=True,
-        **kwargs
-    )
-    test_loader = torch.utils.data.DataLoader(
-        datasets.MNIST(folder_data, train=False, download=False, transform=transform_data),
-        batch_size=batch_size,
-        shuffle=True,
-        **kwargs
-    )
-
-    density = DensityCNNVAE(image_channels=1, latent_dim=512)
-    density.fit(train_loader, epochs=10)
-
-    examples = enumerate(test_loader)
-    batch_idx, (example_data, example_targets) = next(examples)
-
-    x_explain = example_data[0][0].numpy()
-    print(x_explain.shape())
-    x_sample = density.sample_radius(x_exp=x_explain.reshape(-1, 784), r=0.1, n_samples=15000, random_state=None)
-
-    def imshow(inp, title=None):
-        """Imshow for Tensor."""
-        inp = inp.numpy().transpose((1, 2, 0))
-        mean = np.array([0.485, 0.456, 0.406])
-        std = np.array([0.229, 0.224, 0.225])
-        inp = std * inp + mean
-        inp = np.clip(inp, 0, 1)
-        plt.imshow(inp)
-        if title is not None:
-            plt.title(title)
-        plt.pause(0.001)  # pause a bit so that plots are updateda
-
-    inputs = x_sample
-    # Make a grid from batch
-    out = torchvision.utils.make_grid(inputs)
-    imshow(out)

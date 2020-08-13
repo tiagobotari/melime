@@ -1,7 +1,4 @@
 import warnings
-import re
-from collections import Counter
-from collections import OrderedDict
 
 import torch
 import torch.nn as nn
@@ -9,23 +6,35 @@ import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
 
+import re
+from collections import Counter
+
 torch.manual_seed(1)
 
 
-class CBOW(nn.Module):
-    def __init__(self, vocab_size, embedding_dim, context_size=1):
+class TorchCBOW(nn.Module):
+    def __init__(self, vocab_size, embedding_dim, context_size=1, hidden=False):
         super().__init__()
         self.vocab_size = vocab_size
         self.embedding_dim = embedding_dim
         self.context_size = context_size
+        self.hidden = hidden
 
         self.input_dim = self.embedding_dim * self.context_size
         # Create Layers
         self.embedding = nn.Embedding(self.vocab_size, self.embedding_dim)
-        self.l1 = nn.Linear(self.context_size * self.embedding_dim, vocab_size)
+
+        if self.hidden:
+            self.hidden_layer_size = 512
+            self.hidden_layer = nn.Linear(self.context_size * self.embedding_dim, self.hidden_layer_size)
+            self.l1 = nn.Linear(self.hidden_layer_size, vocab_size)
+        else:
+            self.l1 = nn.Linear(self.context_size * self.embedding_dim, vocab_size)
 
     def forward(self, x):
         embeds = self.embedding(x).view(-1, self.input_dim)
+        if self.hidden:
+            embeds = F.elu(self.hidden_layer(embeds))
         y = F.log_softmax(self.l1(embeds), dim=1)
         return y
 
@@ -41,6 +50,7 @@ class ModelCBOW(object):
         embedding_dim=12,
         learning_rate=1e-3,
         cuda=True,
+        optimizer=None,
         verbose=True,
     ):
         self.verbose = verbose
@@ -66,8 +76,10 @@ class ModelCBOW(object):
 
         # self.loss_function = nn.CrossEntropyLoss()
         self.loss_function = nn.NLLLoss()
-
-        self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr)
+        if optimizer is None:
+            self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr)
+        else:
+            self.optimizer = optimizer
         #         self.optimizer = optim.SGD(self.model.parameters(), lr=self.lr)
         self.interval_print = 10
 
@@ -116,9 +128,6 @@ class ModelCBOW(object):
             print(f"Epoch: {epoch} - current_loss loss: {current_loss}")
 
     def predict(self, x):
-        #         context_idxs = torch.tensor(
-        #             [self.word_to_ix[x_i] for x_i in x], dtype=torch.long
-        #         ).to(self.device)
         x = torch.tensor(x).to(self.device)
         print(x)
         print(x.size())
@@ -147,79 +156,7 @@ class ModelCBOW(object):
         for epoch in range(1, epochs + 1):
             self.train(train_loader, epoch)
 
-
-class ContextDataset(Dataset):
-    def __init__(self, corpus, win_size=1, transform=None):
-        """
-        
-        """
-        self.corpus = corpus
-        self.transform = transform
-        data = initialize_corpus(self.corpus)
-        self.vocabulary_size = data["vocabulary_size"]
-        self.word2idx = data["word2idx"]
-        self.idx2word = data["idx2word"]
-        self.vocabulary = data["vocabulary"]
-        self.corpus_tokenized = data["corpus_tokenized"]
-        self.win_size = win_size
-
-        self.context, self.target = generate_context_target(self.corpus_tokenized, self.word2idx, win_size=win_size)
-
-    def convert_to_text(self, indices):
-        return [self.idx2word[i] for i in indices]
-
-    def __len__(self):
-        return len(self.target)
-
-    def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-        x = self.context[idx]
-        y = self.target[idx]
-        if self.transform:
-            x, y = self.transform(x, y)
-        return x, y
-
-
-def generate_context_target(tokenize_corpus, word2idx, win_size=1):
-    context_words = []
-    target_words = []
-    for text in tokenize_corpus:
-        size_text = len(text)
-        for i, word in enumerate(text):
-            j_initial = i - win_size
-            j_final = i + win_size + 1
-            if j_initial < 0 or j_final > size_text:
-                continue
-            context = []
-            for j in range(j_initial, j_final):
-                if j != i:
-                    context.append(word2idx[text[j]])
-            context_words.append(context)
-            target_words.append(word2idx[word])
-    context_words = np.array(context_words).reshape(-1, win_size * 2)
-
-    return context_words, target_words
-
-
-def initialize_corpus(corpus):
-    vocabulary = get_vocabulary(corpus)
-    word2idx = {w: idx for (idx, w) in enumerate(vocabulary)}
-    idx2word = {idx: w for (idx, w) in enumerate(vocabulary)}
-    vocabulary_size = len(vocabulary)
-    corpus_tokenized = tokenize_corpus(corpus)
-    return dict(
-        vocabulary=vocabulary,
-        vocabulary_size=vocabulary_size,
-        word2idx=word2idx,
-        idx2word=idx2word,
-        corpus_tokenized=corpus_tokenized,
-    )
-
-
-def tokenize_corpus(corpus):
-    return [phrases.split() for phrases in corpus]
-
-
-def get_vocabulary(corpus):
-    return set([word for phrase in corpus for word in phrase.split()])
+#     def loss_function(self, y_pred, y_true):
+#         # Negative-log-likelihood - logsoftmax
+#         # loss = F.nll_loss(y_pred, y_true)
+#         return loss
