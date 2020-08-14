@@ -33,11 +33,11 @@ def label_bar(rects, ax, labels=None, offset_y=0.4):
             xy=xy,
             xytext=(0, -1),  # 3 points vertical offset
             textcoords="offset points",
-            ha="center",
+            # ha="center",
             va="bottom",
             size=font_size,
             color="black",
-            horizontalalignment="right",
+            horizontalalignment="center",
         )
         if rect.get_width() > 0:
             aling_text = "right"
@@ -49,11 +49,11 @@ def label_bar(rects, ax, labels=None, offset_y=0.4):
             text = labels[i]
             ax.annotate(
                 text,
-                xy=(rect.get_x(), rect.get_y()),
-                xytext=(off_setx, 0),  # 3 points vertical offset
+                xy=(rect.get_x(), y),
+                xytext=(off_setx, -1),  # 3 points vertical offset
                 textcoords="offset points",
-                ha=aling_text,
-                va="bottom",
+                horizontalalignment=aling_text,
+                verticalalignment="bottom",
                 size=font_size,
             )
 
@@ -141,29 +141,6 @@ class ExplainGraph(object):
         #
         pading_title = 0.01
         
-        colors = ["tab:green", "tab:orange"]
-        ax_target.axvline(x=y_p, ymin=0, ymax=1, color="tab:green", linewidth=5, label=f"Model Prediction: {y_p}")
-        ax_target.axvline(x=y_p_min, ymin=0, ymax=1, color="black", linewidth=3, linestyle=":")
-        ax_target.axvline(
-            x=y_local_model,
-            ymin=0,
-            ymax=1,
-            color="tab:orange",
-            linewidth=3,
-            linestyle="-",
-            label=f"Local Model Prediction: {y_local_model}",
-        )
-        ax_target.axvline(x=y_p_max, ymin=0, ymax=1, color="black", linewidth=3, linestyle=":", label="min/max values")
-        ax_target.set_ylim([0, 1])
-
-        ax_target.set_yticks([])
-        ax_target.tick_params("x", labelsize=15)
-        ax_target.set_xticks(np.linspace(y_p_min, y_p_max, 6))
-        for label in ax_target.get_xticklabels():
-            label.set_ha("right")
-            label.set_rotation(45)
-        ax_target.legend(loc="lower left", bbox_to_anchor=(0, 1), fontsize=12, frameon=False)
-
         plt.annotate(
             "Predicted Target",
             xy=(center_target, top_margin - pading_title),
@@ -176,9 +153,7 @@ class ExplainGraph(object):
             color="black",
             horizontalalignment="right",
         )
-
-        delta = (y_p_max - y_p_min) * 0.015
-        ax_target.set_xlim(xmin=y_p_min - delta, xmax=y_p_max + delta)
+        ax_target = cls.plot_predictions(ax_target, y_p, y_p_min, y_p_max, y_local_model)
 
         # Features plot.
         b_features = 0.65
@@ -189,10 +164,10 @@ class ExplainGraph(object):
         ax_features.set_xticks([])
         ax_features.set_yticks([])
 
-        cell_text = [[e] for e in features]
+        cell_text = features.reshape(-1, 1) #[[e] for e in features]
         color = {0: "lightgray", 1: "white"}
-        cell_colours = [[color[int(e % 2)]] for e in range(len(features))]
-        row_colours = [color[int(e % 2)] for e in range(len(features))]
+        cell_colours = [[color[int(e % 2)]] for e in range(features.shape[1])]
+        row_colours = [color[int(e % 2)] for e in range(features.shape[1])]
         columns = ["Value"]
         rows = feature_names
         
@@ -203,7 +178,6 @@ class ExplainGraph(object):
             font_size_cells = 10
         else:
             y_table_size = 2.0
-
         the_table = plt.table(
             cellText=cell_text,
             cellColours=cell_colours,
@@ -217,21 +191,7 @@ class ExplainGraph(object):
         the_table.set_fontsize(15)
         the_table.scale(1, y_table_size)
         ax_features.set_title('Features', fontsize=font_size)
-        # plt.annotate(
-        #     "Features",
-        #     xy=(center_target, b_features+0.025),
-        #     xycoords="figure fraction",
-        #     xytext=(0.0, 0.0),
-        #     textcoords="offset points",
-        #     ha="center",
-        #     va="bottom",
-        #     size=font_size,
-        #     color="black",
-        #     horizontalalignment="right",
-        # )
-
-        
-        # Importance plot.
+    
         pading = 0.04
         width_rect_right = (width/3.0)*2.-pading
 
@@ -266,10 +226,38 @@ class ExplainGraph(object):
         class_names_sorted = class_names[ind_class_sorted]
         ax_importance = cls.get_plot_feature_importance(
             ax=ax_importance, names=names, vals=vals, class_names=class_names_sorted, size_title=size_title)
-        # plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.7, hspace=None)
+
         axs = [ax_target, ax_features, ax_importance]
         
         return fig, axs
+
+    @staticmethod
+    def plot_predictions(ax, y_p, y_p_min, y_p_max, y_local_model):
+        ax.axvline(
+            x=y_p, ymin=0, ymax=1, color="tab:green", linewidth=5, label=f"Model Prediction: {y_p:5.4f}")
+        ax.axvline(x=y_p_min, ymin=0, ymax=1, color="black", linewidth=3, linestyle=":")
+        if y_local_model:
+            ax.axvline(
+                x=y_local_model,
+                ymin=0,
+                ymax=1,
+                color="tab:orange",
+                linewidth=3,
+                linestyle="-",
+                label=f"Local Model Prediction: {y_local_model:5.4f}",
+            )
+        ax.axvline(x=y_p_max, ymin=0, ymax=1, color="black", linewidth=3, linestyle=":", label="min/max values")
+        ax.set_ylim([0, 1])
+        ax.set_yticks([])
+        ax.tick_params("x", labelsize=15)
+        ax.set_xticks(np.linspace(y_p_min, y_p_max, 6))
+        for label in ax.get_xticklabels():
+            label.set_ha("right")
+            label.set_rotation(45)
+        ax.legend(loc="lower left", bbox_to_anchor=(0, 1), fontsize=12, frameon=False)
+        delta = (y_p_max - y_p_min) * 0.015
+        ax.set_xlim(xmin=y_p_min - delta, xmax=y_p_max + delta)
+        return ax
 
     @staticmethod
     def get_plot_feature_importance(ax, names, vals, class_names, size_title=18):
@@ -295,6 +283,20 @@ class ExplainGraph(object):
         simpleaxis(ax)
         return ax
 
+    @staticmethod
+    def plot_errors(explanation):
+        fig, axis = plt.subplots(1,2)
+        x = range(0, len(explanation.convergence_diffs))
+        y = explanation.convergence_diffs
+        axis[0].plot(x[:], y[:])
+        axis[0].set_ylabel('Difference - Importance')
+        axis[0].set_xlabel('Steps')
+        x = range(0, len(explanation.erros_training))
+        y = explanation.erros_training
+        axis[1].plot(x[:], y[:])
+        axis[1].set_ylabel('Errors')
+        axis[1].set_xlabel('Steps')
+        return fig, axis
 
 def set_size(w, h, ax=None):
     """ w, h: width, height in inches """

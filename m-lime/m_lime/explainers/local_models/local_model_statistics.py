@@ -7,18 +7,46 @@ class BasicStatistics(LocalModelBase):
     """
     Basic descriptive statistics for generating explanation.
     """
-    def __init__(self, x_explain, y_p_explain, feature_names, r=None, tol_convergence=0.001, save_samples=False):
-        super().__init__(x_explain, y_p_explain, feature_names, r, tol_convergence, save_samples)
+
+    def __init__(
+        self, x_explain, chi_explain, y_p_explain, feature_names, r=None, tol_convergence=0.001, save_samples=False
+    ):
+        super().__init__(x_explain, chi_explain, y_p_explain, feature_names, r, tol_convergence, save_samples)
         self.values = {}
         # self.values = {e: [] for e in self.feature_names}
 
-    def measure_convergence(self, chi_set=None, y_true=None):
-        return self._measure_convergence(self._coef_mean)
+    def measure_importances(self):
+        return self._measure_convergence_importance(self._coef_mean)
+
+    def measure_errors(self):
+        return np.mean((self._coef_std))
+
+    def predict(self, x):
+        return None
+
+    def measure_convergence(self, chi_set, y_true):
+        diff = self.measure_importances()
+        error = self.measure_errors()
+        self.erros_training.append(error)
+        self.min_max_predictions(y_p_local_model=None, y_p_black_box_model=y_true)
+        # Test convergence.
+        if diff is None:
+            self.convergence = False
+        elif error <= self.tol_convergence and diff < self.tol_convergence:
+            self.convergence = True
+        else:
+            self.convergence = False
+        return diff, error, self.convergence
 
     @property
     def _coef_mean(self):
         results = self.calculate()
         return np.array([*results["mean"].values()])
+
+    @property
+    def _coef_std(self):
+        results = self.calculate()
+        return np.array([*results["std"].values()])
 
     @property
     def importance(self):
