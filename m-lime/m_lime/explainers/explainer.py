@@ -95,7 +95,10 @@ class Explainer:
         :param local_mini_batch_max: max number of local-mini-batch to generate the linear model
         :return: explanation in a dict with importance, see status
         """
-        chi_explain = self.transformer(x_explain)
+        if self.density.transformer:
+            chi_explain = self.transformer(x_explain)
+        else:    
+            chi_explain = self.transformer(x_explain)
         
         if weight_kernel is None:
             self.weight_kernel=None
@@ -118,7 +121,7 @@ class Explainer:
             y_p_explain = y_p_explain[0]
 
         self.local_model = self.local_algorithm(
-            x_explain, y_p_explain, feature_names=self.feature_names, r=r, tol_convergence=tol)
+            x_explain, chi_explain, y_p_explain, feature_names=self.feature_names, r=r, tol_convergence=tol)
         stats = {}
         con_fav_samples = ConFavExaples()
         self.density.generated_data = None
@@ -149,13 +152,13 @@ class Explainer:
             self.local_model.partial_fit(chi_set, y_p, weight_set)
             if test_batch:
                 self.calc_error(chi_test_set, y_test_set)
-            diff_importance, error_local_model = self.local_model.measure_convergence(chi_set, y_p)
+            diff_importance, error_local_model, converged_lc = self.local_model.measure_convergence(chi_set, y_p)
             if self.verbose:
                 print('########################')
                 print(' Local-Mini-Batch', step)
                 print('\tdiff_importance', 'error_local_model')
                 print('\t', diff_importance, error_local_model)
-            if self.local_model.convergence:
+            if converged_lc:
                 break
         if not self.local_model.convergence:
             warnings.warn(
@@ -163,33 +166,7 @@ class Explainer:
                 + f"Current difference in the importance {diff_importance}/{tol}\n"
                 + f"Current Error: {error_local_model}/{tol}"
             )
-        return self.results(), con_fav_samples, self.local_model
-
-    def results(self):
-        result = dict()
-        result["stats"] = self.stats()
-        result["importance"] = self.local_model.importance
-        return result
-
-    def stats_(self, y_p):
-        class_index = np.argsort(y_p[:, :], axis=1)
-        unique, counts = np.unique(class_index[:, -3:], return_counts=True)
-        self.predictions_index.update(unique)
-        for key, value in zip(unique, counts):
-            self.predictions_stat["count"][key] += value
-            self.predictions_stat["mean_probability"][key] += np.mean(y_p[:, key])
-            self.predictions_stat["std_probability"][key] += np.std(y_p[:, key])
-
-    def stats(self):
-        results = dict()
-        for key in self.predictions_index:
-            results[key] = {
-                "count": self.predictions_stat["count"][key],
-                "mean_probability": self.predictions_stat["mean_probability"][key]
-                / self.predictions_stat["count"][key],
-                "std_probability": self.predictions_stat["std_probability"][key] / self.predictions_stat["count"][key],
-            }
-        return results
+        return self.local_model, con_fav_samples
 
     def calc_error(self, chi_set, y_set):
         y_p_test_set = self.local_model.model.predict(chi_test_set)
