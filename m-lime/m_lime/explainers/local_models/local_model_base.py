@@ -8,14 +8,16 @@ class LocalModelBase(ABC):
     """
     Base class to implement the local models.
     """
-    def __init__(self, x_explain, y_p_explain, feature_names, r, tol_convergence, save_samples=False):
+    def __init__(self, x_explain, chi_explain, y_p_explain, feature_names, r, tol_convergence, save_samples=False):
         self.x_explain = x_explain
+        self.chi_explain = chi_explain
         self.y_p_explain = y_p_explain
         self.feature_names = feature_names
         self.tol_convergence = tol_convergence
         self.previous_convergence = None
         self.n_previous_convergence = None
         self.convergence_diffs = []
+        self.erros_training = []
         self.r = r
         # Samples
         self.save_samples = save_samples
@@ -30,10 +32,53 @@ class LocalModelBase(ABC):
         # Convergence Variable
         self.convergence = False
 
-    @property
+    def measure_convergence(self, chi_set, y_true):
+        y_p_local_model = self.model.predict(chi_set)
+        # Difference of the importance.
+        diff = self.measure_importances()
+        # Error specific for the local model.
+        error = self.measure_errors(y_true, y_p_local_model)
+        self.erros_training.append(error)
+        # Samples Min/Max
+        self.min_max_predictions(y_p_local_model, y_p_black_box_model=y_true)
+        # Test convergence.
+        if diff is None:
+            self.convergence = False
+        elif error <= self.tol_convergence and diff < self.tol_convergence:
+            self.convergence = True
+        else:
+            self.convergence = False
+        return diff, error, self.convergence
+
     @abstractmethod
-    def measure_convergence(self, chi_set=None, y_true=None):
+    def measure_errors(self, y_true, y_p_local_model):
         raise NotImplementedError
+    
+    @abstractmethod
+    def measure_importances(self):
+        raise NotImplementedError
+
+    def min_max_predictions(self, y_p_local_model=None, y_p_black_box_model=None):    
+        # Max and Min y_p_local_model_max value and y_p_max: y_true
+        if y_p_black_box_model is not None:
+            y_p_max = np.max(y_p_black_box_model)
+            y_p_min = np.min(y_p_black_box_model)
+            if self.y_p_max is None:
+                self.y_p_max = y_p_max
+                self.y_p_min = y_p_min
+            else:
+                self.y_p_max = np.max([self.y_p_max, y_p_max])
+                self.y_p_min = np.min([self.y_p_min, y_p_min])
+
+        if y_p_local_model is not None:
+            y_p_local_model_max = np.max(y_p_local_model)
+            y_p_local_model_min = np.min(y_p_local_model)
+            if self.y_p_local_model_max is None:
+                self.y_p_local_model_max = y_p_local_model_max
+                self.y_p_local_model_min = y_p_local_model_min  
+            else:
+                self.y_p_local_model_max = np.max([self.y_p_local_model_max, y_p_local_model_max])
+                self.y_p_local_model_min = np.min([self.y_p_local_model_min, y_p_local_model_min])
 
     @property
     @abstractmethod
@@ -72,12 +117,21 @@ class LocalModelBase(ABC):
         explanation = {}
         if self.feature_names is None:
             self.feature_names = [f'feature {e}' for e in range(len(self.importance))]
+        
+        
+        x_explain = np.array(self.x_explain)
+        chi_explain = np.array(self.chi_explain).reshape(1,  -1)
+
+        y_p = self.predict(chi_explain)
+        if y_p is not None:
+            y_p = y_p[0]
         explanation["feature_names"] = self.feature_names
-        explanation["features"] = self.x_explain.reshape(-1)
+        explanation["features"] = chi_explain
+        explanation["x_explain"] = x_explain
         explanation["y_p"] = self.y_p_explain
         explanation["y_p_max"] = self.y_p_max
         explanation["y_p_min"] = self.y_p_min
-        explanation["y_p_local_model"] = self.predict(self.x_explain)
+        explanation["y_p_local_model"] = y_p
         explanation["y_p_local_model_max"] = self.y_p_local_model_max
         explanation["y_p_local_model_min"] = self.y_p_local_model_min
 
