@@ -53,7 +53,7 @@ class KDEGen(GenBase):
         """
         return np.exp(self.manifold.score_samples(x))
 
-    def sample_radius(self, x_exp, n_min_kernels=10, r=None, n_samples=1, random_state=None):
+    def sample_radius(self, x_exp, r=None, n_min_kernels=10, n_samples=1, random_state=None):
         """Generate random samples from the model.
 
         This is a modification of the method sample from Sklearn KDE.
