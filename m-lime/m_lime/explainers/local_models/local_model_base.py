@@ -2,13 +2,24 @@ from abc import ABC, abstractmethod
 
 import copy
 import numpy as np
-
+from sklearn.preprocessing import StandardScaler
 
 class LocalModelBase(ABC):
     """
     Base class to implement the local models.
     """
-    def __init__(self, x_explain, chi_explain, y_p_explain, feature_names, r, tol_convergence, save_samples=False):
+
+    def __init__(
+        self,
+        x_explain,
+        chi_explain,
+        y_p_explain,
+        feature_names,
+        r,
+        tol_convergence,
+        scale_data=False,
+        save_samples=False,
+    ):
         self.x_explain = x_explain
         self.chi_explain = chi_explain
         self.y_p_explain = y_p_explain
@@ -31,6 +42,10 @@ class LocalModelBase(ABC):
         self.y_p_min = None
         # Convergence Variable
         self.convergence = False
+        if scale_data:
+            self.scaler = StandardScaler()
+        else:
+            self.scaler = IdentityScaler()
 
     def measure_convergence(self, chi_set, y_true):
         y_p_local_model = self.model.predict(chi_set)
@@ -53,12 +68,12 @@ class LocalModelBase(ABC):
     @abstractmethod
     def measure_errors(self, y_true, y_p_local_model):
         raise NotImplementedError
-    
+
     @abstractmethod
     def measure_importances(self):
         raise NotImplementedError
 
-    def min_max_predictions(self, y_p_local_model=None, y_p_black_box_model=None):    
+    def min_max_predictions(self, y_p_local_model=None, y_p_black_box_model=None):
         # Max and Min y_p_local_model_max value and y_p_max: y_true
         if y_p_black_box_model is not None:
             y_p_max = np.max(y_p_black_box_model)
@@ -75,7 +90,7 @@ class LocalModelBase(ABC):
             y_p_local_model_min = np.min(y_p_local_model)
             if self.y_p_local_model_max is None:
                 self.y_p_local_model_max = y_p_local_model_max
-                self.y_p_local_model_min = y_p_local_model_min  
+                self.y_p_local_model_min = y_p_local_model_min
             else:
                 self.y_p_local_model_max = np.max([self.y_p_local_model_max, y_p_local_model_max])
                 self.y_p_local_model_min = np.min([self.y_p_local_model_min, y_p_local_model_min])
@@ -94,10 +109,10 @@ class LocalModelBase(ABC):
                 self.y_samples = y_set
             else:
                 if weight_set is not None:
-                    self.weight_samples =  np.append(self.weight_samples, weight_set, axis=0) 
+                    self.weight_samples = np.append(self.weight_samples, weight_set, axis=0)
                 self.x_samples = np.append(self.x_samples, x_set, axis=0)
                 self.y_samples = np.append(self.y_samples, y_set, axis=0)
-        
+
     def predict(self, x):
         raise NotImplementedError
 
@@ -110,17 +125,16 @@ class LocalModelBase(ABC):
             diff = np.sum(np.abs(self.previous_convergence - values)) / self.n_previous_convergence
             self.convergence_diffs.append(diff)
             self.previous_convergence = copy.deepcopy(values)
-  
+
         return diff
 
     def explain(self):
         explanation = {}
         if self.feature_names is None:
-            self.feature_names = [f'feature {e}' for e in range(len(self.importance))]
-        
-        
+            self.feature_names = [f"feature {e}" for e in range(len(self.importance))]
+
         x_explain = np.array(self.x_explain)
-        chi_explain = np.array(self.chi_explain).reshape(1,  -1)
+        chi_explain = np.array(self.chi_explain).reshape(1, -1)
 
         y_p = self.predict(chi_explain)
         if y_p is not None:
@@ -134,8 +148,20 @@ class LocalModelBase(ABC):
         explanation["y_p_local_model"] = y_p
         explanation["y_p_local_model_max"] = self.y_p_local_model_max
         explanation["y_p_local_model_min"] = self.y_p_local_model_min
+        explanation["error"] = self.erros_training[-1]
 
         explanation["importances"] = self.importance
+        explanation["diff_convergence_importances"] = self.convergence_diffs[-1]
         explanation["ind_class_sorted"] = 0
         explanation["class_names"] = ["taget"]
         return explanation
+
+
+class IdentityScaler(StandardScaler):
+    
+    def transform(self, X, copy=None):
+        return X
+    
+    def fit_transform(self, X, y=None, **fit_params):
+        super().fit(X, y=y, **fit_params)
+        return X

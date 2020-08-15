@@ -36,24 +36,6 @@ class ExplainerLinear(Explainer):
             verbose=verbose
         )
 
-    def explain_instance(
-        self,
-        x_explain,
-        r=None, class_index=0,
-        n_samples=2000, tol=0.0001,
-        local_mini_batch_max=100,
-        weight_kernel='gaussian'
-        ):
-        return super().explain_instance(
-            x_explain,
-            r=r,
-            class_index=class_index,
-            n_samples=n_samples,
-            tol=tol,
-            local_mini_batch_max=local_mini_batch_max,
-            weight_kernel=weight_kernel
-        )
-
     def lime_explainer(self, local_model):
         from lime.lime_tabular import TableDomainMapper
         from lime import explanation

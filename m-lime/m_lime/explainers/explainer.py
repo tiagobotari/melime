@@ -83,7 +83,8 @@ class Explainer:
         tol=0.001,
         local_mini_batch_max=100,
         weight_kernel=None,
-        test_batch=False 
+        test_batch=False, 
+        scale_data=False
         ):
         """
         Generate an explanation for an instance from a ML model.
@@ -113,7 +114,9 @@ class Explainer:
         else:
             self.weight_kernel = weight_kernel
 
-        diff = None
+        diff_importance = None
+        error_local_model = None
+
         y_p_explain = self.model_predict(x_explain)
         if len(y_p_explain.shape)==2:
             y_p_explain = y_p_explain[0][class_index]
@@ -121,38 +124,52 @@ class Explainer:
             y_p_explain = y_p_explain[0]
 
         self.local_model = self.local_algorithm(
-            x_explain, chi_explain, y_p_explain, feature_names=self.feature_names, r=r, tol_convergence=tol)
+            x_explain, 
+            chi_explain, 
+            y_p_explain, 
+            feature_names=self.feature_names, 
+            r=r, tol_convergence=tol, 
+            scale_data=scale_data
+        )
         stats = {}
         con_fav_samples = ConFavExaples()
         self.density.generated_data = None
         
         if test_batch:
-            x_test_set = self.density.sample_radius(x_explain, r, n_samples=n_samples)                
+            x_test_set = self.density.sample_radius(x_explain, r=r, n_samples=n_samples)                
             chi_test_set = self.transformer(x_test_set)
             y_test_set = self.model_predict(x_test_set)
 
         for step in range(local_mini_batch_max):
             if self.density.transformer:
-                x_set, chi_set = self.density.sample_radius(x_explain, r, n_samples=n_samples)
+                x_set, chi_set = self.density.sample_radius(x_explain, r=r, n_samples=n_samples)
             else:
-                x_set = self.density.sample_radius(x_explain, r, n_samples=n_samples)                
+                x_set = self.density.sample_radius(x_explain, r=r, n_samples=n_samples)                
                 chi_set = self.transformer(x_set)
+                
             if x_set is None:
+                warnings.warn("New sample set is None!")
                 break
+            elif x_set.shape[0] == 0:
+                warnings.warn("New sample set is empty, try increase the r value!")
+                break
+            print(chi_set)
+            x_set[0] = x_explain[0].reshape(x_set[0].shape)
+            chi_set[0] = chi_explain[0].reshape(chi_set[0].shape)
             if self.weight_kernel is not None:
                 weight_set = self.weight_kernel(chi_set)
             else:
                 weight_set = None
+
             y_p = self.model_predict(x_set)
-            # TODO: Look for the statistics.
-            # self.stats_(y_p)
             if len(y_p.shape) != 1:
                 y_p = y_p[:, class_index]
-            con_fav_samples.insert_many(x_set, y_p)
             self.local_model.partial_fit(chi_set, y_p, weight_set)
             if test_batch:
                 self.calc_error(chi_test_set, y_test_set)
             diff_importance, error_local_model, converged_lc = self.local_model.measure_convergence(chi_set, y_p)
+            con_fav_samples.insert_many(x_set, y_p)
+            # self.plot_convergence(x_set, y_p, diff_importance, error_local_model)          
             if self.verbose:
                 print('########################')
                 print(' Local-Mini-Batch', step)
@@ -173,7 +190,22 @@ class Explainer:
         v1 = metrics.explained_variance_score(y_test_set, y_p_test_set, sample_weight=weight_set)
         v2 = metrics.mean_squared_error(y_test_set, y_p_test_set, sample_weight=weight_set)
         return v1, v2
-                
+
+    def plot_convergence(self, x_set, y_p, diff_importance, error_local_model):
+        from matplotlib import pyplot as plt
+        fig, axs = plt.subplots(2,2, figsize=(6,6))
+        axs[0, 0].scatter(x_set[:,0], x_set[:,1], c=y_p, s=10)
+        axs[0, 0].scatter([x_set[0,0]], [x_set[0,1]], s=20, c='red')
+        axs[1, 0].scatter(x_set[:,0], x_set[:,1], c=self.local_model.predict(x_set))
+        axs[0, 1].scatter(x_set[:,0], self.local_model.predict(x_set), c='green')
+        axs[0, 1].scatter(x_set[:,0], y_p, c='red', s=10)
+        axs[1, 1].scatter(x_set[:,1], self.local_model.predict(x_set), c='green')
+        axs[1, 1].scatter(x_set[:,1], y_p, c='red', s=10)
+        print(self.local_model.importance)
+        print('diff_importance', 'Errors')
+        print(diff_importance, error_local_model)
+        plt.show()            
+
 
 class ConFavExaples(object):
     """
