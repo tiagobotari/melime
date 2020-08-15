@@ -8,10 +8,21 @@ class BasicStatistics(LocalModelBase):
     Basic descriptive statistics for generating explanation.
     """
 
+    # TODO: See “Algorithms for computing the sample variance: Analysis and recommendations.” for improments.
     def __init__(
-        self, x_explain, chi_explain, y_p_explain, feature_names, r=None, tol_convergence=0.001, save_samples=False
+        self,
+        x_explain,
+        chi_explain,
+        y_p_explain,
+        feature_names,
+        r=None,
+        tol_convergence=0.001,
+        scale_data=False,
+        save_samples=False,
     ):
-        super().__init__(x_explain, chi_explain, y_p_explain, feature_names, r, tol_convergence, save_samples)
+        super().__init__(
+            x_explain, chi_explain, y_p_explain, feature_names, r, tol_convergence, scale_data, save_samples
+        )
         self.values = {}
         # self.values = {e: [] for e in self.feature_names}
 
@@ -19,7 +30,7 @@ class BasicStatistics(LocalModelBase):
         return self._measure_convergence_importance(self._coef_mean)
 
     def measure_errors(self):
-        return np.mean((self._coef_std))
+        return 0.0
 
     def predict(self, x):
         return None

@@ -162,7 +162,6 @@ class GridPlot(object):
         **kwargs
     ):
         """
-
         :param x:
         :param x_cols_name:
         :param plot_cols:
