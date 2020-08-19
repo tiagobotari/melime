@@ -16,7 +16,7 @@ class KDEGen(GenBase):
     Modification of KenelDensity from sklearn do sample data around a specific point.
     """
 
-    def __init__(self, search_best=True, verbose=True, **kwargs):
+    def __init__(self, search_best=True, verbose=False, **kwargs):
         super().__init__()
         
         self.manifold = KernelDensity(**kwargs)

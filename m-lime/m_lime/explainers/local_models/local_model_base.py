@@ -15,8 +15,11 @@ class LocalModelBase(ABC):
         chi_explain,
         y_p_explain,
         feature_names,
+        target_names,
+        class_index,
         r,
-        tol_convergence,
+        tol_importance,
+        tol_error,
         scale_data=False,
         save_samples=False,
     ):
@@ -24,7 +27,10 @@ class LocalModelBase(ABC):
         self.chi_explain = chi_explain
         self.y_p_explain = y_p_explain
         self.feature_names = feature_names
-        self.tol_convergence = tol_convergence
+        self.target_names = target_names
+        self.class_index = class_index
+        self.tol_importance = tol_importance
+        self.tol_error = tol_error
         self.previous_convergence = None
         self.n_previous_convergence = None
         self.convergence_diffs = []
@@ -59,7 +65,7 @@ class LocalModelBase(ABC):
         # Test convergence.
         if diff is None:
             self.convergence = False
-        elif error <= self.tol_convergence and diff < self.tol_convergence:
+        elif error <= self.tol_error and diff < self.tol_importance:
             self.convergence = True
         else:
             self.convergence = False
@@ -100,7 +106,6 @@ class LocalModelBase(ABC):
     def importance(self):
         raise NotImplementedError
 
-    @abstractmethod
     def partial_fit(self, x_set, y_set, weight_set=None):
         if self.save_samples:
             if self.x_samples is None:
@@ -139,9 +144,13 @@ class LocalModelBase(ABC):
         y_p = self.predict(chi_explain)
         if y_p is not None:
             y_p = y_p[0]
-        explanation["feature_names"] = self.feature_names
-        explanation["features"] = chi_explain
-        explanation["x_explain"] = x_explain
+        explanation["chi_names"] = self.feature_names
+        explanation["chi_values"] = chi_explain
+        # explanation["feature_names"] = self.feature_names
+        # explanation["features"] = chi_explain
+        explanation["x_names"] = x_explain
+        explanation["x_values"] = x_explain
+        
         explanation["y_p"] = self.y_p_explain
         explanation["y_p_max"] = self.y_p_max
         explanation["y_p_min"] = self.y_p_min
@@ -152,8 +161,8 @@ class LocalModelBase(ABC):
 
         explanation["importances"] = self.importance
         explanation["diff_convergence_importances"] = self.convergence_diffs[-1]
-        explanation["ind_class_sorted"] = 0
-        explanation["class_names"] = ["taget"]
+        explanation["index_class"] = self.class_index
+        explanation["class_names"] = self.target_names
         return explanation
 
 

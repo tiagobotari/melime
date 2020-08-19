@@ -8,62 +8,6 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 class ImagePlot(object):
-    # @classmethod
-    # def plot_importance_negative_positive(cls, importance, shape=None, standardization=False):
-    #     # TODO: Normalize the importance, give the option
-    #     # TODO: add a variable shape
-    #     if standardization:
-    #         importance = importance / np.std(importance)
-    #     if shape is None:
-    #         n_importance = importance.shape
-    #         n_size = int(np.sqrt(n_importance))
-    #         shape = (n_size, n_size)
-
-    #     max_importance = np.max(importance)
-    #     min_importance = np.min(importance)
-    #     max_scale = np.max(np.abs([max_importance, max_importance]))
-        
-    #     importance = importance.reshape(shape)
-
-    #     fig, ax = plt.subplots(1, 3, figsize=(20, 10))
-    #     fig.subplots_adjust(left=0.02, bottom=0.06, right=0.95, top=0.94, wspace=0.1)
-    #     ax.reshape(-1)
-
-    #     cmap_ = cls.color_map()
-    #     cp_importance = cls.plot_importance_(
-    #         importance=importance, 
-    #         title="General Importance", 
-    #         fig=fig, ax=ax[0],
-    #         cmap=cmap_,
-    #         vmax=max_scale, 
-    #         vmin=-max_scale
-    #     )
-
-    #     positive = importance.copy()
-    #     positive[positive < 0] = 0
-    #     cls.plot_importance_(
-    #         importance=positive,
-    #         title="Positive Contribution", 
-    #         fig=fig, ax=ax[1], 
-    #         cmap=cmap_,
-    #         vmax=max_scale, 
-    #         vmin=-max_scale
-    #     )
-
-    #     negative = importance.copy()
-    #     negative[negative > 0] = 0
-    #     cls.plot_importance_(
-    #         importance=negative, 
-    #         title="Negative Contribution", 
-    #         fig=fig, ax=ax[2],
-    #         cmap=cmap_, 
-    #         vmax=max_scale, 
-    #         vmin=-max_scale
-    #     )
-    #     # left=0.02, bottom=0.06, right=0.95, top=0.94, wspace=0.1
-       
-    #     return fig, ax
-    
     @classmethod
     def plot_importance(cls, importance, shape=None, standardization=False):
         # TODO: Normalize the importance, give the option
@@ -78,7 +22,7 @@ class ImagePlot(object):
         max_importance = np.max(importance)
         min_importance = np.min(importance)
         max_scale = np.max(np.abs([max_importance, max_importance]))
-        
+
         importance = importance.reshape(shape)
 
         fig, ax = plt.subplots(figsize=(5, 5))
@@ -86,22 +30,17 @@ class ImagePlot(object):
 
         cmap_ = cls.color_map()
         cp_importance = cls.plot_importance_(
-            importance=importance, 
-            title="General Importance", 
-            fig=fig, ax=ax,
-            cmap=cmap_,
-            vmax=max_scale, 
-            vmin=-max_scale
+            importance=importance, title=" ", fig=fig, ax=ax, cmap=cmap_, vmax=max_scale, vmin=-max_scale
         )
 
         return fig, ax
 
     @staticmethod
     def color_map():
-        colors = cm.get_cmap('bwr', 200)
-        scale_color = [*range(0, 50, 1)]+[*range(50, 80, 8)]
-        scale_color1 = [*range(120, 120+30, 5)]+[*range(120+30, 200, 1)]
-        newcolors = colors(scale_color+[*range(98,103)]+scale_color1)
+        colors = cm.get_cmap("bwr", 200)
+        scale_color = [*range(0, 50, 1)] + [*range(50, 80, 8)]
+        scale_color1 = [*range(120, 120 + 30, 5)] + [*range(120 + 30, 200, 1)]
+        newcolors = colors(scale_color + [*range(98, 103)] + scale_color1)
         newcmp = matplotlib.colors.ListedColormap(newcolors)
         return newcmp
 
@@ -112,15 +51,10 @@ class ImagePlot(object):
         ax.set_yticks([], [])
         # plt.setp(ax.get_xticklabels(), visible=False)
         # plt.setp(ax.get_yticklabels(), visible=False)
-        cp = ax.imshow(
-                importance,
-                interpolation="none",
-                norm=matplotlib.colors.DivergingNorm(0),  
-                **kwarg
-        )
+        cp = ax.imshow(importance, interpolation="none", norm=matplotlib.colors.DivergingNorm(0), **kwarg)
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("right", size="5%", pad=0.05)
-        cbar = plt.colorbar(cp, cax=cax)  #, fraction=0.046, pad=0.01)
+        cbar = plt.colorbar(cp, cax=cax)  # , fraction=0.046, pad=0.01)
         cbar.ax.tick_params(labelsize=15)
         return cp
 
@@ -131,11 +65,12 @@ class ImagePlot(object):
         ax.set_xticks([], [])
         ax.set_yticks([], [])
         ax.set_title(y_, fontsize=18)
-        colors = matplotlib.cm.get_cmap('Greys', 200)
-        scale_color = [*range(0, 100, 8)]+[*range(100, 200, 1)]
+        colors = matplotlib.cm.get_cmap("Greys", 200)
+        scale_color = [*range(0, 100, 8)] + [*range(100, 200, 1)]
         newcolors = colors(scale_color)
         newcmp = matplotlib.colors.ListedColormap(newcolors)
-        return ax.imshow(x_, interpolation = 'none', cmap=newcmp)
+        return ax.imshow(x_, interpolation="none", cmap=newcmp)
+
 
 class GridPlot(object):
     @classmethod
@@ -289,8 +224,8 @@ def histogram(x, bins=15, normalization=None, bin_edges=None):
     return hist, bins, bin_edges, normalization
 
 
-def shiftedColorMap(cmap, start=0, midpoint=0.5, stop=1.0, name='shiftedcmap'):
-    '''
+def shiftedColorMap(cmap, start=0, midpoint=0.5, stop=1.0, name="shiftedcmap"):
+    """
     Function to offset the "center" of a colormap. Useful for
     data with a negative min and positive max and you want the
     middle of the colormap's dynamic range to be at zero.
@@ -310,30 +245,24 @@ def shiftedColorMap(cmap, start=0, midpoint=0.5, stop=1.0, name='shiftedcmap'):
       stop : Offset from highest point in the colormap's range.
           Defaults to 1.0 (no upper offset). Should be between
           `midpoint` and 1.0.
-    '''
-    cdict = {
-        'red': [],
-        'green': [],
-        'blue': [],
-        'alpha': []
-    }
+    """
+    cdict = {"red": [], "green": [], "blue": [], "alpha": []}
 
     # regular index to compute the colors
     reg_index = np.linspace(start, stop, 257)
 
     # shifted index to match the data
-    shift_index = np.hstack([
-        np.linspace(0.0, midpoint, 128, endpoint=False), 
-        np.linspace(midpoint, 1.0, 129, endpoint=True)
-    ])
+    shift_index = np.hstack(
+        [np.linspace(0.0, midpoint, 128, endpoint=False), np.linspace(midpoint, 1.0, 129, endpoint=True)]
+    )
 
     for ri, si in zip(reg_index, shift_index):
         r, g, b, a = cmap(ri)
 
-        cdict['red'].append((si, r, r))
-        cdict['green'].append((si, g, g))
-        cdict['blue'].append((si, b, b))
-        cdict['alpha'].append((si, a, a))
+        cdict["red"].append((si, r, r))
+        cdict["green"].append((si, g, g))
+        cdict["blue"].append((si, b, b))
+        cdict["alpha"].append((si, a, a))
 
     newcmap = matplotlib.colors.LinearSegmentedColormap(name, cdict)
     plt.register_cmap(cmap=newcmap)
@@ -341,25 +270,27 @@ def shiftedColorMap(cmap, start=0, midpoint=0.5, stop=1.0, name='shiftedcmap'):
     return newcmap
 
 
-
 def label_bar(rects, ax, labels=None):
-    colors = ['blue', 'orange']
+    colors = ["blue", "orange"]
     for rect, color in zip(rects, colors):
         width = rect.get_width()
-        rect.set_color('r')
-        ax.annotate('{:3.2f}'.format(width),
-                    xy=(rect.get_width() / 2, rect.get_y() - 0.2 + rect.get_height() / 2),
-                    xytext=(0, 3),  # 3 points vertical offset
-                    textcoords="offset points",
-                    ha='center', va='bottom',
-                    size=30)
+        rect.set_color("r")
+        ax.annotate(
+            "{:3.2f}".format(width),
+            xy=(rect.get_width() / 2, rect.get_y() - 0.2 + rect.get_height() / 2),
+            xytext=(0, 3),  # 3 points vertical offset
+            textcoords="offset points",
+            ha="center",
+            va="bottom",
+            size=30,
+        )
 
 
 def simpleaxis(ax):
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['bottom'].set_visible(False)
-    ax.spines['left'].set_visible(False)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.spines["bottom"].set_visible(False)
+    ax.spines["left"].set_visible(False)
 
 
 class SparseMatrix(object):
@@ -368,6 +299,7 @@ class SparseMatrix(object):
     check if a array is sparse.
     # TODO: The NLS, LLS, NNPredict should accept sparse array
     """
+
     def __init__(self):
         pass
 
@@ -427,54 +359,53 @@ class ExplainText(object):
 
         words_features_document_rank = words_features_document[betas_rank_ind]
 
-        return dict(betas=betas_final[betas_rank_ind]
-                    , betas_document=betas_document[betas_rank_ind]
-                    , betas_document_neg=betas_document_neg[betas_rank_ind]
-                    , words=words_features_document_rank
-                    , prediction=prediction
-                    , prediction_proba=predict_proba
-                    , document=document
-                    )
+        return dict(
+            betas=betas_final[betas_rank_ind],
+            betas_document=betas_document[betas_rank_ind],
+            betas_document_neg=betas_document_neg[betas_rank_ind],
+            words=words_features_document_rank,
+            prediction=prediction,
+            prediction_proba=predict_proba,
+            document=document,
+        )
 
     def document_html(self, x_explain, document, num_features=10, tokenizer=None):
         exp = self.get_text_explanation(x_explain, document, num_features=num_features)
         if tokenizer is None:
             return None
-        document_html = ''
+        document_html = ""
         document_tokens = tokenizer(document)
         for words in document_tokens:
-            if words in exp['words']:
+            if words in exp["words"]:
                 document_html += words
             print(words)
-
 
     def explain_graphical(self, x_explain, document, num_features=10):
         exp = self.get_text_explanation(x_explain, document, num_features=num_features)
         fig, axs = plt.subplots(1, 3, figsize=(15, 5))
-        rects1 = axs[0].barh(self.class_names, exp['prediction_proba'])
+        rects1 = axs[0].barh(self.class_names, exp["prediction_proba"])
         axs[0].set_xticks([])
-        colors = ['blue', 'orange']
+        colors = ["blue", "orange"]
         for rect, color in zip(rects1, colors):
             rects1[0].set_color(color)
-        axs[0].set_title('Prediction probabilities')
+        axs[0].set_title("Prediction probabilities")
         simpleaxis(axs[0])
         label_bar(rects1, axs[0])
-        names = exp['words']
-        vals = exp['betas']
+        names = exp["words"]
+        vals = exp["betas"]
         vals = vals[::-1]
         names = names[::-1]
-        colors = ['green' if x > 0 else 'red' for x in vals]
+        colors = ["green" if x > 0 else "red" for x in vals]
         pos = np.arange(len(vals))
-        axs[1].barh(pos, vals, align='center', color=colors)
+        axs[1].barh(pos, vals, align="center", color=colors)
         axs[1].set_yticks(pos)
         axs[1].set_yticklabels(names)
-        axs[2].set_title('Important Features')
+        axs[2].set_title("Important Features")
         simpleaxis(axs[2])
         axs[2].set_xticks([])
         axs[2].set_yticks([])
-        axs[2].text(0, 1, '\n' + exp['document'], style='italic', wrap=True, va='top')
-        axs[2].set_title('Document to Explain')
+        axs[2].text(0, 1, "\n" + exp["document"], style="italic", wrap=True, va="top")
+        axs[2].set_title("Document to Explain")
         plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.5, hspace=None)
         return fig, axs
-
 
