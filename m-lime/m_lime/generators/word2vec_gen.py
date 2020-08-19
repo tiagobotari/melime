@@ -48,14 +48,18 @@ class Word2VecGen(GenBase):
             tokens_exp = x_exp[0].split()
             samples = dict()
             for pos, word in enumerate(tokens_exp):
-                samples[pos] = self.manifold.get_similar_words(word, n_sample=n_samples*200)
+                samples[pos] = self.manifold.get_similar_words(word, n_sample=n_samples * 200)
 
             self.generated_data = DatasetSamples(tokens_exp, samples)
-        
+
         return self.generated_data.sample(n_samples)
 
     def sample(self, n_samples=1, random_state=None):
         return self.manifold.sample(n_samples=n_samples, random_state=random_state)
+
+    def transform(self, x):
+        chi = np.array([i for i, _ in enumerate(x[0].split())]).reshape(1, -1)
+        return chi
 
 
 class DatasetSamples:

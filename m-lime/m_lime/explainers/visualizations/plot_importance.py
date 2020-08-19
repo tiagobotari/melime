@@ -103,8 +103,9 @@ class ExplainGraph(object):
     def plot(cls, explanation):
         size_title = 18
         class_names = explanation["class_names"]
-        feature_names = explanation["feature_names"]
-        features = explanation["features"]
+        feature_names = explanation["chi_names"]
+        features = explanation["chi_values"]
+
         importances = explanation["importances"]
         diff_importances = explanation["diff_convergence_importances"]
         errors = explanation['error']
@@ -112,8 +113,6 @@ class ExplainGraph(object):
         y_local_model = explanation["y_p_local_model"]
         y_p_max = explanation["y_p_max"]
         y_p_min = explanation["y_p_min"]
-
-        ind_class_sorted = 0
 
         n_importance = len(importances)
 
@@ -166,11 +165,10 @@ class ExplainGraph(object):
         #     color="black",
         #     horizontalalignment="right",
         # )
-       
-    
-        ax_target = cls.plot_predictions(ax_target, y_p, y_p_min, y_p_max, y_local_model)
+        ax_target = cls.plot_predictions(ax_target, y_p, y_p_min, y_p_max, y_local_model, y_name=class_names[0])
+        
         # Features plot.
-        b_features = 0.65
+        b_features = 0.63
         h_features = 0.01
         rect_features = [left + 0.1, b_features, width_rect_left - 0.2, h_features]
         ax_features = plt.axes(rect_features)
@@ -221,7 +219,6 @@ class ExplainGraph(object):
 
         names = feature_names[::-1]
         vals = importances[::-1]
-
         center_feature_importance = l_ + width_rect_right / 2.0
         plt.annotate(
             "Feature Importance",
@@ -248,9 +245,8 @@ class ExplainGraph(object):
         #     horizontalalignment="right",
         # )
         # Importance
-        class_names_sorted = class_names[ind_class_sorted]
-        ax_importance = cls.get_plot_feature_importance(
-            ax=ax_importance, names=names, vals=vals, class_names=class_names_sorted, size_title=size_title
+        ax_importance = cls.plot_feature_importance(
+            ax=ax_importance, names=names, vals=vals, size_title=size_title
         )
 
         axs = [ax_target, ax_features, ax_importance]
@@ -258,8 +254,8 @@ class ExplainGraph(object):
         return fig, axs
 
     @staticmethod
-    def plot_predictions(ax, y_p, y_p_min, y_p_max, y_local_model):
-        ax.axvline(x=y_p, ymin=0, ymax=1, color="tab:green", linewidth=7, label=f"Model Prediction: {y_p:5.4f}")
+    def plot_predictions(ax, y_p, y_p_min, y_p_max, y_local_model, y_name=''):
+        ax.axvline(x=y_p, ymin=0, ymax=1, color="tab:green", linewidth=4, label=f"Model Prediction: {y_p:5.4f}")
         ax.axvline(x=y_p_min, ymin=0, ymax=1, color="black", linewidth=3, linestyle=":")
         if y_local_model:
             ax.axvline(
@@ -278,16 +274,17 @@ class ExplainGraph(object):
         ax.set_yticks([])
         ax.tick_params("x", labelsize=15)
         ax.set_xticks(np.linspace(y_p_min, y_p_max, 6))
+        ax.set_xlabel(y_name, fontsize=15)
         for label in ax.get_xticklabels():
             label.set_ha("right")
             label.set_rotation(45)
-        ax.legend(loc="lower left", bbox_to_anchor=(0, 1), fontsize=12, frameon=False)
+        ax.legend(loc="lower left", bbox_to_anchor=(-0.15, 1), fontsize=15, frameon=False)
         delta = (y_p_max - y_p_min) * 0.015
         ax.set_xlim(xmin=y_p_min - delta, xmax=y_p_max + delta)
         return ax
 
     @staticmethod
-    def get_plot_feature_importance(ax, names, vals, class_names, size_title=18):
+    def plot_feature_importance(ax, names, vals, size_title=18):
         colors = ["tab:blue" if x > 0 else "tab:red" for x in vals]
         pos = np.arange(len(vals))
         rects2 = ax.barh(pos, vals, align="center", alpha=0.5, color=colors)

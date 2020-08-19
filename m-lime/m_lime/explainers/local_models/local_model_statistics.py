@@ -15,13 +15,25 @@ class BasicStatistics(LocalModelBase):
         chi_explain,
         y_p_explain,
         feature_names,
+        target_names,
+        class_index,
         r=None,
-        tol_convergence=0.001,
+        tol_importance=0.001,
+        tol_error=None,
         scale_data=False,
         save_samples=False,
     ):
         super().__init__(
-            x_explain, chi_explain, y_p_explain, feature_names, r, tol_convergence, scale_data, save_samples
+            x_explain,
+            chi_explain,
+            y_p_explain,
+            feature_names,
+            target_names,
+            class_index,
+            r,
+            tol_importance,
+            scale_data,
+            save_samples,
         )
         self.values = {}
         # self.values = {e: [] for e in self.feature_names}
@@ -43,7 +55,7 @@ class BasicStatistics(LocalModelBase):
         # Test convergence.
         if diff is None:
             self.convergence = False
-        elif error <= self.tol_convergence and diff < self.tol_convergence:
+        elif error <= self.tol_error and diff < self.tol_importance:
             self.convergence = True
         else:
             self.convergence = False
