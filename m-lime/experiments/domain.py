@@ -67,9 +67,12 @@ class Spiral(object):
 
     def plot(self):
         fig, ax = plt.subplots()
-        ax.scatter(self.data[:, 0], self.data[:, 1], c=self.target)
+        cp = ax.scatter(self.data[:, 0], self.data[:, 1], c=self.target)
         ax.set_xlabel(self.feature_names[0])
         ax.set_ylabel(self.feature_names[1])
+        color = plt.colorbar(cp)
+        color.set_label(label='Length Spiral', size=18)
+        color.ax.tick_params(labelsize=14)
         return fig, ax
 
 
