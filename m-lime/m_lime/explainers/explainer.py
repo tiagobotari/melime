@@ -7,13 +7,14 @@ from sklearn import metrics
 
 from m_lime.explainers.local_models.local_model_statistics import BasicStatistics
 from m_lime.explainers.local_models.local_model_linear import RidgeMod, HuberRegressorMod, SGDRegressorMod
-
+from m_lime.explainers.local_models.local_model_tree import Tree
 
 standard_local_models = {
     "BasicStatistics": BasicStatistics,
     "SGD": SGDRegressorMod,
     "Ridge": RidgeMod,
     "HuberRegressor": HuberRegressorMod,
+    "Tree": Tree,
 }
 
 standard_weight_kernel = ["gaussian"]
@@ -86,6 +87,7 @@ class Explainer:
         weight_kernel=None,
         test_batch=False,
         scale_data=False,
+        include_x_explain_train=True
     ):
         """
         Generate an explanation for an instance from a ML model.
@@ -160,8 +162,9 @@ class Explainer:
                 break
 
             # Include the x_explain each local-mini-batch
-            # x_set = np.append(x_set, x_explain.reshape([1]+[*x_set[0].shape]), axis=0)
-            # chi_set = np.append(chi_set, chi_explain.reshape([1]+[*chi_set[0].shape]), axis=0)
+            if include_x_explain_train:
+                x_set = np.append(x_set, x_explain.reshape([1]+[*x_set[0].shape]), axis=0)
+                chi_set = np.append(chi_set, chi_explain.reshape([1]+[*chi_set[0].shape]), axis=0)
 
             if self.weight_kernel is not None:
                 weight_set = self.weight_kernel(chi_set)
@@ -200,7 +203,6 @@ class Explainer:
 
     def plot_convergence(self, x_set, y_p, diff_importance, error_local_model):
         from matplotlib import pyplot as plt
-
         fig, axs = plt.subplots(2, 2, figsize=(6, 6))
         axs[0, 0].scatter(x_set[:, 0], x_set[:, 1], c=y_p, s=10)
         axs[0, 0].scatter([x_set[0, 0]], [x_set[0, 1]], s=20, c="red")

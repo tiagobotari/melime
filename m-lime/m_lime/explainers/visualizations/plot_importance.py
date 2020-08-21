@@ -108,7 +108,7 @@ class ExplainGraph(object):
 
         importances = explanation["importances"]
         diff_importances = explanation["diff_convergence_importances"]
-        errors = explanation['error']
+        errors = explanation["error"]
         y_p = explanation["y_p"]
         y_local_model = explanation["y_p_local_model"]
         y_p_max = explanation["y_p_max"]
@@ -166,7 +166,7 @@ class ExplainGraph(object):
         #     horizontalalignment="right",
         # )
         ax_target = cls.plot_predictions(ax_target, y_p, y_p_min, y_p_max, y_local_model, y_name=class_names[0])
-        
+
         # Features plot.
         b_features = 0.63
         h_features = 0.01
@@ -245,16 +245,20 @@ class ExplainGraph(object):
         #     horizontalalignment="right",
         # )
         # Importance
-        ax_importance = cls.plot_feature_importance(
-            ax=ax_importance, names=names, vals=vals, size_title=size_title
-        )
+        ax_importance = cls.plot_feature_importance(ax=ax_importance, names=names, vals=vals, size_title=size_title)
 
         axs = [ax_target, ax_features, ax_importance]
 
         return fig, axs
 
     @staticmethod
-    def plot_predictions(ax, y_p, y_p_min, y_p_max, y_local_model, y_name=''):
+    def plot_predictions(ax, y_p=None, y_p_min=None, y_p_max=None, y_local_model=None, y_name="", explanation=None):
+        if explanation is not None:
+            y_p = explanation["y_p"]
+            y_local_model = explanation["y_p_local_model"]
+            y_p_max = explanation["y_p_max"]
+            y_p_min = explanation["y_p_min"]
+
         ax.axvline(x=y_p, ymin=0, ymax=1, color="tab:green", linewidth=4, label=f"Model Prediction: {y_p:5.4f}")
         ax.axvline(x=y_p_min, ymin=0, ymax=1, color="black", linewidth=3, linestyle=":")
         if y_local_model:
@@ -267,9 +271,7 @@ class ExplainGraph(object):
                 linestyle="-",
                 label=f"Local Model Prediction: {y_local_model:5.4f}",
             )
-        ax.axvline(
-            x=y_p_max, ymin=0, ymax=1, color="black", linewidth=3, linestyle=":", label="min/max values"
-        )
+        ax.axvline(x=y_p_max, ymin=0, ymax=1, color="black", linewidth=3, linestyle=":", label="min/max values")
         ax.set_ylim([0, 1])
         ax.set_yticks([])
         ax.tick_params("x", labelsize=15)
