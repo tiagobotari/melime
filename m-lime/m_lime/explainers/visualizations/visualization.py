@@ -8,8 +8,44 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 class ImagePlot(object):
+    
     @classmethod
-    def plot_importance(cls, importance, shape=None, standardization=False):
+    def plot_importance_contrafactual(cls, explain_dict, contra, class_name):
+        y = 'Prediction: f{np.argmax(y_explain):}'
+        importances_ = explain_dict['importances']
+        
+        fig = plt.figure(constrained_layout=False, figsize=(7., 3.5))
+        offset_x = -0.14
+        ax1 = fig.add_axes([0.1+offset_x, 0.01, 0.5, 0.85])
+        offset_x = -0.01
+        x1 = 0.45+offset_x
+        w1 = 0.26
+        x2 = x1+w1+0.02
+        ax2 = fig.add_axes([x1, 0.00, w1, 0.57])
+        ax3 = fig.add_axes([x2, 0.00, w1, 0.57])
+        ax1.set_title('Importance')
+        a, cp_importance = cls.plot_importance(importances_, standardization=True, ax=ax1)
+
+        plot = cls.plot_instances(
+            ax3, contra.samples_con[0].reshape(28,28))
+        # ax3.set_title(
+        #     f'Contrary\nProbability: {contra.y_con[0]:5.3f}', fontsize=14)
+        ax3.set_title(
+            f'Contrary:', fontsize=14)
+        plot = cls.plot_instances(
+        ax2, contra.samples_fav[0].reshape(28,28))
+        # ax2.set_title(
+            # f'Favorable\nProbability.: {contra.y_fav[0]:5.3f}', fontsize=14)
+        ax2.set_title(
+            f'Favorable', fontsize=14)
+        plt.annotate(
+            f'Why is it classified as {class_name}?',
+            xy=((x1+x2+w1)/2.0, 0.88), xycoords='figure fraction',
+            horizontalalignment='center', fontsize=22)
+        return fig, [ax1, ax2, ax3]
+
+    @classmethod
+    def plot_importance(cls, importance, shape=None, standardization=False, ax=None):
         # TODO: Normalize the importance, give the option
         # TODO: add a variable shape
         if standardization:
@@ -24,28 +60,28 @@ class ImagePlot(object):
         max_scale = np.max(np.abs([max_importance, max_importance]))
 
         importance = importance.reshape(shape)
-
-        fig, ax = plt.subplots(figsize=(5, 5))
-        fig.subplots_adjust(left=0.02, bottom=0.06, right=0.95, top=0.94, wspace=0.1)
+        if ax is None:
+            fig, ax = plt.subplots(figsize=(5, 5))
+            fig.subplots_adjust(left=0.02, bottom=0.06, right=0.95, top=0.94, wspace=0.1)
 
         cmap_ = cls.color_map()
-        cp_importance = cls.plot_importance_(
-            importance=importance, title=" ", fig=fig, ax=ax, cmap=cmap_, vmax=max_scale, vmin=-max_scale
+        cp_importance, cbar = cls.plot_importance_(
+            importance=importance, title=" ", ax=ax, cmap=cmap_, vmax=max_scale, vmin=-max_scale
         )
-
-        return fig, ax
+        cbar.ax.set_xlabel('Importance', fontsize=18, labelpad=2)
+        return ax, cp_importance
 
     @staticmethod
     def color_map():
         colors = cm.get_cmap("bwr", 200)
         scale_color = [*range(0, 50, 1)] + [*range(50, 80, 8)]
-        scale_color1 = [*range(120, 120 + 30, 5)] + [*range(120 + 30, 200, 1)]
+        scale_color1 = [*range(120, 120 + 30, 8)] + [*range(120 + 30, 200, 1)]
         newcolors = colors(scale_color + [*range(98, 103)] + scale_color1)
         newcmp = matplotlib.colors.ListedColormap(newcolors)
         return newcmp
 
     @staticmethod
-    def plot_importance_(importance, title, fig, ax, **kwarg):
+    def plot_importance_(importance, title, ax, **kwarg):
         ax.set_title(title, fontsize=20)
         ax.set_xticks([], [])
         ax.set_yticks([], [])
@@ -53,10 +89,12 @@ class ImagePlot(object):
         # plt.setp(ax.get_yticklabels(), visible=False)
         cp = ax.imshow(importance, interpolation="none", norm=matplotlib.colors.DivergingNorm(0), **kwarg)
         divider = make_axes_locatable(ax)
-        cax = divider.append_axes("right", size="5%", pad=0.05)
-        cbar = plt.colorbar(cp, cax=cax)  # , fraction=0.046, pad=0.01)
-        cbar.ax.tick_params(labelsize=15)
-        return cp
+        cax = divider.append_axes("top", size="5%", pad=0.05)
+        cbar = plt.colorbar(cp, cax=cax, orientation="horizontal", fraction=0.07,anchor=(1.0,0.0) )  # , fraction=0.046, pad=0.01)
+        cbar.ax.tick_params(labelsize=13, pad=-1, direction='in')
+        cax.xaxis.set_ticks_position("top")
+        cax.xaxis.set_label_position("top")
+        return cp, cbar
 
     @classmethod
     def plot_instances(cls, ax=None, x_=None, y_=None):
@@ -94,7 +132,7 @@ class GridPlot(object):
         ax=None,
         alpha=1.0,
         figsize=(10, 10),
-        **kwargs
+        **kwargs,
     ):
         """
         :param x:
@@ -314,98 +352,82 @@ class SparseMatrix(object):
 
 
 class ExplainText(object):
-    def __init__(self, model, class_names, names_features):
-        """
-        :param model: NLS model;
-        :param class_names: class names to be utilized in the plot;
-        :param names_features: names of the features.
-        """
-        self.model = model
-        self.class_names = class_names
-        self.names_features = names_features
+    @classmethod
+    def plot(cls, importances, words):
+        from IPython.core.display import HTML
 
-    def get_text_explanation(self, x_explain, document, num_features=10):
-        """
-        Get the explanation of text document.
-        :param x_explain: document to be explained, should be vectorized;
-        :param document: document in text format;
-        :param num_features: number of features to produce the explanation.
-        :return: betas values and words correspondent to the explanation.
-        """
-        explanation = self.model.get_thetas(x_pred=x_explain, net_scale=True)
-        betas = explanation[2][0]
-        words_from_text_indices = np.argwhere(x_explain[0] != 0).reshape(-1)
-        print(words_from_text_indices)
-        print(x_explain[0][words_from_text_indices])
+        # Color scale.
+        n = 102
+        n_f = 34
+        r_ = np.concatenate(
+            (
+                np.linspace(130, 160, n),
+                np.linspace(160, 255, n),
+                [255] * (2 * n_f),
+                np.linspace(255, 0, n_f),
+                np.array([0] * n * 2),
+            )
+        ).astype(np.int)
+        g_ = np.concatenate(
+            (
+                np.array([0] * 2 * n),
+                np.linspace(0, 255, n_f),
+                [255] * (n_f),
+                np.linspace(255, 0, n_f),
+                np.array([0] * 2 * n),
+            )
+        ).astype(np.int)
+        b_ = np.concatenate(
+            (
+                np.array([0] * 2 * n),
+                np.linspace(0, 255, n_f),
+                [255] * (2 * n_f),
+                np.linspace(255, 160, n),
+                np.linspace(160, 130, n),
+            )
+        ).astype(np.int)
 
-        # Prediction from the model
-        prediction = self.model.predict(x_explain).reshape(-1)
-        predict_proba = self.model.predict_proba(x_explain).reshape(-1)
-        ind_pred_proba = np.argsort(predict_proba)[::-1]
+        def f(x):
+            result = np.array(2.5 * n * x + 2.5 * n)
+            result = result.astype(np.int)
+            return result
 
-        # col_betas = int(prediction)
-        col_betas = ind_pred_proba[0]
-        col_betas_neg = ind_pred_proba[1]
+        indices = f(np.array(importances))
 
-        betas_document = betas[words_from_text_indices, col_betas]
-        betas_document_neg = betas[words_from_text_indices, col_betas_neg]
+        def html_color(indices, words):
+            background = """
+            background-image: linear-gradient(90deg,
+            rgba(130, 0, 0, 0.5), rgb(160, 0, 0, 0.5), rgba(255, 0, 0, 0.5),
+            rgb(255, 255, 225, 0.5),
+            rgba(0, 0, 255, 0.5), rgba(0, 0, 160, 0.5), rgba(0, 0, 130, 0.5))"""
 
-        betas_final = betas_document - betas_document_neg
-        words_features_document = self.names_features[words_from_text_indices].reshape(-1)
+            string = ""
+            for e, word in zip(indices, words):
+                str_ = f"""
+                <div style="background-color:rgba({r_[e]}, {g_[e]}, {b_[e]}, 0.5);
+                padding:0px 2px 0px 2px;
+                margin:2px 2px 0px 0px">
+                <span style="color:black; font: 400 8px/0.85rem  sans-serif;">{word} </span>
+                </div>
+                """
+                string += str_
+            # width:300px;
+            string = f"""
+            <div style="display:flex;  flex-direction:column; align-items:center">
+            <span style="color:black">
+            Importance
+            </span>
+            <div style="{background}; width:80%; height:10px">  </div>
+            <div style="display: flex; width:82%; flex-direction: row; justify-content: space-between"> 
+            <span style="color:black; font: 400 8px/0.85rem  sans-serif;"> -1.0 </span>
+            <span style="color:black; font: 400 8px/0.85rem  sans-serif;"> 0.0 </span>
+            <span style="color:black; font: 400 8px/0.85rem  sans-serif;"> +1.0 </span>
+            </div>
 
-        # Organize
-        beta_0_abs = np.abs(betas_final)
-        betas_rank_ind = np.flip(np.argsort(beta_0_abs))[:num_features]
+            <div style="display:flex; flex-wrap:wrap"> {string}   
+            </div>
+            </div>
+            """
+            return HTML(string)
 
-        words_features_document_rank = words_features_document[betas_rank_ind]
-
-        return dict(
-            betas=betas_final[betas_rank_ind],
-            betas_document=betas_document[betas_rank_ind],
-            betas_document_neg=betas_document_neg[betas_rank_ind],
-            words=words_features_document_rank,
-            prediction=prediction,
-            prediction_proba=predict_proba,
-            document=document,
-        )
-
-    def document_html(self, x_explain, document, num_features=10, tokenizer=None):
-        exp = self.get_text_explanation(x_explain, document, num_features=num_features)
-        if tokenizer is None:
-            return None
-        document_html = ""
-        document_tokens = tokenizer(document)
-        for words in document_tokens:
-            if words in exp["words"]:
-                document_html += words
-            print(words)
-
-    def explain_graphical(self, x_explain, document, num_features=10):
-        exp = self.get_text_explanation(x_explain, document, num_features=num_features)
-        fig, axs = plt.subplots(1, 3, figsize=(15, 5))
-        rects1 = axs[0].barh(self.class_names, exp["prediction_proba"])
-        axs[0].set_xticks([])
-        colors = ["blue", "orange"]
-        for rect, color in zip(rects1, colors):
-            rects1[0].set_color(color)
-        axs[0].set_title("Prediction probabilities")
-        simpleaxis(axs[0])
-        label_bar(rects1, axs[0])
-        names = exp["words"]
-        vals = exp["betas"]
-        vals = vals[::-1]
-        names = names[::-1]
-        colors = ["green" if x > 0 else "red" for x in vals]
-        pos = np.arange(len(vals))
-        axs[1].barh(pos, vals, align="center", color=colors)
-        axs[1].set_yticks(pos)
-        axs[1].set_yticklabels(names)
-        axs[2].set_title("Important Features")
-        simpleaxis(axs[2])
-        axs[2].set_xticks([])
-        axs[2].set_yticks([])
-        axs[2].text(0, 1, "\n" + exp["document"], style="italic", wrap=True, va="top")
-        axs[2].set_title("Document to Explain")
-        plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.5, hspace=None)
-        return fig, axs
-
+        return html_color(indices, words)
