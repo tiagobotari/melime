@@ -6,7 +6,6 @@ import matplotlib
 from matplotlib import cm
 
 
-
 def color_map():
         colors = cm.get_cmap("bwr", 200)
         scale_color = [*range(0, 50, 1)] + [*range(50, 80, 8)]
@@ -43,8 +42,9 @@ def plot(data, xi=None, cmap='RdBu_r', axis=plt, percentile=100, dilation=3.0, a
     
     if len(data.shape) == 3:
         data = np.mean(data, 2)
-    axis.imshow(data, extent=extent, interpolation='none', cmap=cmap, vmin=-abs_min, vmax=abs_max)
+    cp = axis.imshow(data, extent=extent, interpolation='none', cmap=cmap, vmin=-abs_min, vmax=abs_max)
     if overlay is not None:
         axis.imshow(overlay, extent=extent, interpolation='none', cmap=cmap_xi, alpha=alpha)
-    axis.axis('off')
-    return axis
+    #axis.axis('off')
+
+    return axis, cp
