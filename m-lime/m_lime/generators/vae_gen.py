@@ -89,19 +89,21 @@ class ModelVAE(object):
             loss.backward()
             train_loss += loss.item()
             self.optimizer.step()
+            
             if self.verbose:
                 if batch_idx % self.log_interval == 0:
-                    print(
-                        "\rTrain Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}".format(
-                            epoch,
-                            batch_idx * len(data),
-                            len(train_loader.dataset),
-                            100.0 * batch_idx / len(train_loader),
-                            loss.item() / len(data),
-                        ),
-                        end="",
-                    )
-                    print()
+                    # TODO: Verbose do not work with iterable dataset.
+                    try:
+                        print(
+                            f"\rTrain Epoch: {epoch} [{batch_idx}/{batch_idx * len(data)} " \
+                            f"({100.0 * batch_idx / len(train_loader):.0f}%)]\tLoss: {loss.item() / len(data):8.6f}"
+                        )
+                    except Exception as inst:
+                        print(inst)
+                        print(
+                            f"\rTrain Epoch: {epoch} [{batch_idx}/{batch_idx * len(data)} " \
+                            f"({batch_idx})]\tLoss: {loss.item() / len(data):8.6f}"
+                        )
         if self.verbose:
             print("Epoch: {} - Mean loss: {:.4f}".format(epoch, train_loss / len(train_loader.dataset)))
 
