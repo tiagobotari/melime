@@ -1,3 +1,6 @@
 [submodule "src/external_modules/inpainting"]
 	path = src/external_modules/inpainting
 	url = https://github.com/DAA233/generative-inpainting-pytorch.git
+[submodule "submodules/innvestigate"]
+	path = submodules/innvestigate
+	url = https://github.com/albermax/innvestigate.git
