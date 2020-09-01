@@ -186,6 +186,8 @@ for i, (x, y) in enumerate(test_images):
         # Store the analysis.
         analysis[i, aidx] = a[0]
 
+# TODO Append our method here
+
 # # # # # #
 # Plot 
 # Prepare the grid as rectengular list
