@@ -15,7 +15,10 @@ class VAEGen(GenBase):
             self.model = model
         self.manifold = None
 
-    def fit(self, x, epochs=10):
+    def fit(self, x, epochs=10, batch_size=128, **kwargs):
+        if not isinstance(x, torch.utils.data.DataLoader):
+            train = torch.utils.data.TensorDataset(torch.from_numpy(x))
+            x = torch.utils.data.DataLoader(train, batch_size=batch_size, **kwargs)
         self.model.train_epochs(train_loader=x, epochs=epochs)
         return self
 
@@ -76,13 +79,13 @@ class ModelVAE(object):
         ).to(self.device)
 
         self.optimizer = optim.Adam(self.model.parameters(), lr=1e-3)
-        self.log_interval = 10
+        self.log_interval = 100
 
     def train(self, train_loader, epoch):
         self.model.train()
         train_loss = 0
-        for batch_idx, (data, _) in enumerate(train_loader):
-            data = data.to(self.device).reshape(-1, self.input_dim)
+        for batch_idx, data in enumerate(train_loader):
+            data = data[0].to(self.device).reshape(-1, self.input_dim)
             self.optimizer.zero_grad()
             recon_batch, mu, log_var = self.model(data)
             loss = self.loss_function(recon_batch, data, mu, log_var)
