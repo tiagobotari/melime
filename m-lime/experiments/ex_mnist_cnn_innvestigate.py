@@ -4,6 +4,7 @@ if not os.path.exists('submodules/innvestigate/innvestigate'):
 
 import sys
 sys.path.append('submodules/innvestigate')
+sys.path.append('m-lime')
 
 import imp
 import numpy as np
@@ -20,6 +21,9 @@ import innvestigate.utils.visualizations as ivis
 
 import matplotlib.pyplot as plt
 
+from m_lime.generators.vae_gen import VAEGen
+from m_lime.explainers.explainer import Explainer
+
 # Use utility libraries to focus on relevant iNNvestigate routines.
 eutils = imp.load_source("utils", "submodules/innvestigate/examples/utils.py")
 mnistutils = imp.load_source("utils_mnist", "submodules/innvestigate/examples/utils_mnist.py")
@@ -34,7 +38,7 @@ def graymap(X):
 data_not_preprocessed = mnistutils.fetch_data()
 
 # Create preprocessing functions
-input_range = [-1, 1]
+input_range = [0, 1]
 preprocess, revert_preprocessing = mnistutils.create_preprocessing_f(data_not_preprocessed[0], input_range)
 
 # Preprocess data
@@ -57,7 +61,7 @@ if keras.backend.image_data_format == "channels_first":
 else:
     input_shape = (28, 28, 1)
 
-
+path_ = "m-lime/experiments/"
 os.makedirs("m-lime/experiments/pretrained", exist_ok=True)
 model_path = 'm-lime/experiments/pretrained/cnn.keras'
 
@@ -128,7 +132,7 @@ model_wo_softmax = iutils.keras.graph.model_wo_softmax(model)
 
 # Create analyzers.
 analyzers = []
-analyzer_store_path = "m-lime/experiments/pretrained/analyzer_%s.npz"
+analyzer_store_path = f"{path_}pretrained/analyzer_%s.npz"
 for method in methods:
     analyzer_file = analyzer_store_path % method[0]
 
@@ -154,7 +158,7 @@ for method in methods:
 n = 10
 test_images = list(zip(data[2][:n], data[3][:n]))
 
-analysis = np.zeros([len(test_images), len(analyzers), 28, 28, 3])
+analysis = np.zeros([len(test_images), len(analyzers)+1, 28, 28, 3])
 text = []
 
 for i, (x, y) in enumerate(test_images):
@@ -186,7 +190,53 @@ for i, (x, y) in enumerate(test_images):
         # Store the analysis.
         analysis[i, aidx] = a[0]
 
-# TODO Append our method here
+# MeLIME
+def model_predict(x_e):
+    prob = model.predict_on_batch(x_e)
+    y_hat = prob[0].argmax()
+    return prob
+
+x_train = data[0]
+y_train = data[1]
+
+# Training the VAEGen
+vae_gen_path = f"{path_}pretrained/vae_gen_mnist_innvestigate1.melime"
+generator = VAEGen(input_dim=784, verbose=True, device='cuda')
+if os.path.exists(vae_gen_path): 
+    generator = generator.load_manifold(vae_gen_path)
+else:
+    generator.fit(x_train, epochs=20)
+    generator.save_manifold(vae_gen_path)
+
+
+
+def explanation_melime(x_explain):
+    explain_linear = Explainer(
+        model_predict=model_predict,
+        generator=generator,
+        local_model='SGD'
+    )
+    y_explain = model_predict(x_explain)
+    y_explain_index = np.argmax(y_explain)
+    explanation, contra = explain_linear.explain_instance(
+            x_explain=x_explain,
+            r=2.0,
+            n_samples=500,
+            class_index=y_explain_index,
+            tol_importance=0.1,
+            tol_error=0.1,
+            weight_kernel=None,
+            local_mini_batch_max=100,
+            scale_data=False
+        )
+    return explanation.importance
+
+for i, (x, y) in enumerate(test_images):
+    a = explanation_melime(x.reshape(-1, 28,28,1)).reshape(1, 28,28,1)
+    a = mnistutils.postprocess(a)
+    a = mnistutils.heatmap(a)
+    analysis[i,-1] =a[0]
+
 
 # # # # # #
 # Plot 
@@ -197,7 +247,7 @@ grid = [[analysis[i, j] for j in range(analysis.shape[1])]
 label, presm, prob, pred = zip(*text)
 row_labels_left = [('label: {}'.format(label[i]), 'pred: {}'.format(pred[i])) for i in range(len(label))]
 row_labels_right = [('logit: {}'.format(presm[i]), 'prob: {}'.format(prob[i])) for i in range(len(label))]
-col_labels = [''.join(method[3]) for method in methods]
+col_labels = [''.join(method[3]) for method in methods] + ["MeLIME"]
 
 # Plot the analysis.
 eutils.plot_image_grid(grid, row_labels_left, row_labels_right, col_labels,

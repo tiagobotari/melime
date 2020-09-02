@@ -8,10 +8,11 @@ from matplotlib import cm
 
 def color_map():
         colors = cm.get_cmap("bwr", 200)
-        scale_color = [*range(0, 50, 1)] + [*range(50, 80, 8)]
-        scale_color1 = [*range(120, 120 + 30, 8)] + [*range(120 + 30, 200, 1)]
+        scale_color = [*range(0, 50, 1)] + [*range(50, 80, 2)]
+        scale_color1 = [*range(120, 120 + 30, 2)] + [*range(120 + 30, 200, 1)]
         newcolors = colors(scale_color + [*range(98, 103)] + scale_color1)
         newcmp = matplotlib.colors.ListedColormap(newcolors)
+        # newcmp=colors
         return newcmp
 
 def plot(data, xi=None, cmap='RdBu_r', axis=plt, percentile=100, dilation=3.0, alpha=0.8):
