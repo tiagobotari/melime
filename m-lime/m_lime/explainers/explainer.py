@@ -104,6 +104,7 @@ class Explainer:
         else:
             chi_explain = self.transformer(x_explain)
 
+        shape_input = list(x_explain.shape[1:])
         if weight_kernel is None:
             self.weight_kernel = None
         elif isinstance(weight_kernel, str):
@@ -171,7 +172,7 @@ class Explainer:
             else:
                 weight_set = None
 
-            y_p = self.model_predict(x_set)
+            y_p = self.model_predict(x_set.reshape([-1]+shape_input))
             if len(y_p.shape) != 1:
                 y_p = y_p[:, class_index]
             self.local_model.partial_fit(chi_set, y_p, weight_set)
