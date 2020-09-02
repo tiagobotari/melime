@@ -6,7 +6,7 @@ from matplotlib import cm
 from scipy.sparse import issparse
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.colors as mcolors
-
+from skimage import feature, transform
 
 class ImagePlot(object):
     @classmethod
@@ -26,9 +26,9 @@ class ImagePlot(object):
         ax1.set_title("Importance")
         a, cp_importance = cls.plot_importance(importances_, standardization=True, ax=ax1)
 
-        plot = cls.plot_instances(ax3, contra.samples_con[0].reshape(28, 28))
+        plot = cls.plot_instances(contra.samples_con[0].reshape(28, 28), ax=ax3)
         ax3.set_title(f"Contrary:", fontsize=14)
-        plot = cls.plot_instances(ax2, contra.samples_fav[0].reshape(28, 28))
+        plot = cls.plot_instances(contra.samples_fav[0].reshape(28, 28), ax=ax2)
         ax2.set_title(f"Favorable", fontsize=14)
         plt.annotate(
             f"Why is it classified as {class_name}?",
@@ -68,12 +68,44 @@ class ImagePlot(object):
 
     @staticmethod
     def color_map():
-        colors = cm.get_cmap("bwr", 200)
+        colors = cm.get_cmap("bwr", 201)
         scale_color = [*range(0, 50, 1)] + [*range(50, 80, 8)]
-        scale_color1 = [*range(120, 120 + 30, 8)] + [*range(120 + 30, 200, 1)]
-        newcolors = colors(scale_color + [*range(98, 103)] + scale_color1)
+        scale_color1 = [*range(120, 150, 8)] + [*range(150, 200, 1)]
+        newcolors = colors(scale_color + [*range(99, 102)] + scale_color1)
         newcmp = matplotlib.colors.ListedColormap(newcolors)
+        # newcmp = colors
         return newcmp
+
+    @classmethod
+    def plot_edges(cls, xi, data, ax, dilation=3.0,  percentile=100):
+        cmap = cls.color_map()
+
+        dx, dy = 0.05, 0.05
+        xx = np.arange(0.0, data.shape[1], dx)
+        yy = np.arange(0.0, data.shape[0], dy)
+        xmin, xmax, ymin, ymax = np.amin(xx), np.amax(xx), np.amin(yy), np.amax(yy)
+        extent = xmin, xmax, ymin, ymax
+        cmap_xi = plt.get_cmap('Greys_r')
+        cmap_xi.set_bad(alpha=0)
+        overlay = None
+        if xi is not None:
+            # Compute edges (to overlay to heatmaps later)
+            xi_greyscale = xi if len(xi.shape) == 2 else np.mean(xi, axis=-1)
+            in_image_upscaled = transform.rescale(xi_greyscale, dilation, mode='constant')
+            edges = feature.canny(in_image_upscaled).astype(float)
+            edges[edges < 0.5] = np.nan
+            edges[:5, :] = np.nan
+            edges[-5:, :] = np.nan
+            edges[:, :5] = np.nan
+            edges[:, -5:] = np.nan
+            overlay = edges
+
+        abs_max = np.percentile(np.abs(data), percentile)
+        abs_min = abs_max
+        cp = ax.imshow(data, extent=extent, interpolation='none', cmap=cmap, vmin=-abs_min, vmax=abs_max)    
+        ax.imshow(overlay, extent=extent, interpolation='none', cmap=cmap_xi, alpha=1.0)
+
+        return ax
 
     @staticmethod
     def plot_importance_(importance, title, ax, **kwarg):
@@ -94,7 +126,7 @@ class ImagePlot(object):
         return cp, cbar
 
     @classmethod
-    def plot_instances(cls, ax=None, x_=None, y_=None):
+    def plot_instances(cls, x_=None, y_=None, ax=None):
         if ax is None:
             fig, ax = plt.subplots(figsize=(5, 5))
         ax.set_xticks([], [])
@@ -207,8 +239,8 @@ class GridPlot(object):
 
         if y_discrete:
             handles, labels = ax[0, 1].get_legend_handles_labels()
-            fig.legend(handles, labels, loc="upper center", borderaxespad=0, ncol=10)  
-        plt.subplots_adjust(top=0.97)
+            fig.legend(handles, labels, loc="upper center", borderaxespad=0.1, ncol=10)  
+        plt.subplots_adjust(top=0.96, bottom=0.06, left=0.06, right=0.97)
         if cp is not None:
             return ax, cp
         return ax
@@ -274,7 +306,7 @@ class GridPlot(object):
             )
 
         for i, label in enumerate(feature_names):
-            axis[i].set_xlabel(label, fontdict={"fontsize": 18})
+            axis[i].set_xlabel(label, fontdict={"fontsize": 15})
 
         if y_discrete:
             handles, labels = axis[0].get_legend_handles_labels()
@@ -287,7 +319,7 @@ class GridPlot(object):
                 bbox_to_anchor=(0.0, 0.02, 1.0, 1.0),
                 mode=True,
             )
-        plt.subplots_adjust(left=0.04, bottom=0.2, right=0.96, top=0.85, wspace=0.1, hspace=0.0)
+        plt.subplots_adjust(left=0.08, bottom=0.2, right=0.96, top=0.85, wspace=0.1, hspace=0.0)
         return fig, axis
 
     @classmethod
