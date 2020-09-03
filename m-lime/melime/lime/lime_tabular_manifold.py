@@ -9,8 +9,8 @@ import scipy as sp
 from matplotlib import pyplot as plt
 
 from lime.lime_tabular import *
-from m_lime.generators.kde_gen import KDEGen
-from m_lime.generators.kdepca_gen import KDEPCAGen, KDEKPCAGen
+from melime.generators.kde_gen import KDEGen
+from melime.generators.kdepca_gen import KDEPCAGen, KDEKPCAGen
 
 
 class LimeTabularExplainerManifold(LimeTabularExplainer):

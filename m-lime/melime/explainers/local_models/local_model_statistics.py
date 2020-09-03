@@ -1,6 +1,6 @@
 import numpy as np
 
-from m_lime.explainers.local_models.local_model_base import LocalModelBase
+from melime.explainers.local_models.local_model_base import LocalModelBase
 
 
 class BasicStatistics(LocalModelBase):

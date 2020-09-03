@@ -8,7 +8,7 @@ from sklearn.utils import check_random_state
 from sklearn.model_selection import GridSearchCV
 from scipy.stats import multivariate_normal
 
-from m_lime.generators.gen_base import GenBase
+from melime.generators.gen_base import GenBase
 
 
 class KDEGen(GenBase):

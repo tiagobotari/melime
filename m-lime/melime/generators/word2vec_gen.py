@@ -1,9 +1,9 @@
 from enum import Enum
 import numpy as np
 
-from m_lime.generators.gen_base import GenBase
-from m_lime.generators.models.gensim_cbow import GensimCBOW
-from m_lime.generators.models.torch_word2vec import TorchCBOW
+from melime.generators.gen_base import GenBase
+from melime.generators.models.gensim_cbow import GensimCBOW
+from melime.generators.models.torch_word2vec import TorchCBOW
 
 
 models_available = {"gensim_CBOW": GensimCBOW, "torch_CBOW": TorchCBOW}
