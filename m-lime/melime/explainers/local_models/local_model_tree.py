@@ -5,7 +5,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn import tree
 
-from m_lime.explainers.local_models.local_model_linear import LocalModelLinear
+from melime.explainers.local_models.local_model_linear import LocalModelLinear
 
 
 def transformer_identity(x):

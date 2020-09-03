@@ -6,8 +6,8 @@ TODO: Independent Component Analysis
 from sklearn.decomposition import IncrementalPCA, KernelPCA
 from sklearn.manifold import Isomap
 
-from m_lime.generators.gen_base import GenBase
-from m_lime.generators.kde_gen import KDEGen
+from melime.generators.gen_base import GenBase
+from melime.generators.kde_gen import KDEGen
 
 
 class KDEPCAGen(GenBase):

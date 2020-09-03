@@ -3,7 +3,7 @@ import torch.utils.data
 from torch import nn, optim
 from torch.nn import functional
 
-from m_lime.generators.gen_base import GenBase
+from melime.generators.gen_base import GenBase
 
 
 class VAEGen(GenBase):

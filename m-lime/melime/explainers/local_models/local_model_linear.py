@@ -5,7 +5,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import SGDRegressor, Ridge, HuberRegressor
 
-from m_lime.explainers.local_models.local_model_base import LocalModelBase
+from melime.explainers.local_models.local_model_base import LocalModelBase
 
 
 def transformer_identity(x):
