@@ -8,9 +8,10 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.colors as mcolors
 from skimage import feature, transform
 
+
 class ImagePlot(object):
     @classmethod
-    def plot_importance_contrafactual(cls, explain_dict, contra, class_name):
+    def plot_importance_contrafactual(cls, explain_dict, contra, class_name, x_explain=None):
         y = "Prediction: f{np.argmax(y_explain):}"
         importances_ = explain_dict["importances"]
 
@@ -24,7 +25,7 @@ class ImagePlot(object):
         ax2 = fig.add_axes([x1, 0.00, w1, 0.57])
         ax3 = fig.add_axes([x2, 0.00, w1, 0.57])
         ax1.set_title("Importance")
-        a, cp_importance = cls.plot_importance(importances_, standardization=True, ax=ax1)
+        a, cp_importance = cls.plot_importance(importances_, standardization=True, ax=ax1, x_explain=x_explain,)
 
         plot = cls.plot_instances(contra.samples_con[0].reshape(28, 28), ax=ax3)
         ax3.set_title(f"Contrary:", fontsize=14)
@@ -39,10 +40,18 @@ class ImagePlot(object):
         )
         return fig, [ax1, ax2, ax3]
 
+    @staticmethod
+    def color_map():
+        colors = cm.get_cmap("bwr", 201)
+        scale_color = [*range(0, 50, 1)] + [*range(50, 80, 8)]
+        scale_color1 = [*range(120, 150, 8)] + [*range(150, 200, 1)]
+        newcolors = colors(scale_color + [*range(98, 104)] + scale_color1)
+        newcmp = matplotlib.colors.ListedColormap(newcolors)
+        # newcmp = colors
+        return newcmp
+
     @classmethod
-    def plot_importance(cls, importance, shape=None, standardization=False, ax=None):
-        # TODO: Normalize the importance, give the option
-        # TODO: add a variable shape
+    def plot_importance(cls, importance, shape=None, standardization=False, ax=None, x_explain=None):
         if standardization:
             importance = importance / np.std(importance)
         if shape is None:
@@ -60,66 +69,49 @@ class ImagePlot(object):
             fig.subplots_adjust(left=0.02, bottom=0.06, right=0.95, top=0.94, wspace=0.1)
 
         cmap_ = cls.color_map()
+
+        dx, dy = 0.05, 0.05
+        xx = np.arange(0.0, importance.shape[1] + dx, dx)
+        yy = np.arange(0.0, importance.shape[0] + dy, dy)
+        xmin, xmax, ymin, ymax = np.amin(xx), np.amax(xx), np.amin(yy), np.amax(yy)
+        extent = xmin, xmax, ymin, ymax
+
         cp_importance, cbar = cls.plot_importance_(
-            importance=importance, title=" ", ax=ax, cmap=cmap_, vmax=max_scale, vmin=-max_scale
+            importance=importance,
+            title=" ",
+            ax=ax,
+            extent=extent,
+            cmap=cmap_,
+            vmax=max_scale,
+            vmin=-max_scale
         )
         cbar.ax.set_xlabel("Importance", fontsize=18, labelpad=2)
+        if x_explain is not None:
+           cls.plot_mask(data=x_explain, ax=ax, extent=extent)
+
         return ax, cp_importance
 
     @staticmethod
-    def color_map():
-        colors = cm.get_cmap("bwr", 201)
-        scale_color = [*range(0, 50, 1)] + [*range(50, 80, 8)]
-        scale_color1 = [*range(120, 150, 8)] + [*range(150, 200, 1)]
-        newcolors = colors(scale_color + [*range(99, 102)] + scale_color1)
-        newcmp = matplotlib.colors.ListedColormap(newcolors)
-        # newcmp = colors
-        return newcmp
-
-    @classmethod
-    def plot_edges(cls, xi, data, ax, dilation=3.0,  percentile=100):
-        cmap = cls.color_map()
-
-        dx, dy = 0.05, 0.05
-        xx = np.arange(0.0, data.shape[1], dx)
-        yy = np.arange(0.0, data.shape[0], dy)
-        xmin, xmax, ymin, ymax = np.amin(xx), np.amax(xx), np.amin(yy), np.amax(yy)
-        extent = xmin, xmax, ymin, ymax
-        cmap_xi = plt.get_cmap('Greys_r')
-        cmap_xi.set_bad(alpha=0)
-        overlay = None
-        if xi is not None:
-            # Compute edges (to overlay to heatmaps later)
-            xi_greyscale = xi if len(xi.shape) == 2 else np.mean(xi, axis=-1)
-            in_image_upscaled = transform.rescale(xi_greyscale, dilation, mode='constant')
-            edges = feature.canny(in_image_upscaled).astype(float)
-            edges[edges < 0.5] = np.nan
-            edges[:5, :] = np.nan
-            edges[-5:, :] = np.nan
-            edges[:, :5] = np.nan
-            edges[:, -5:] = np.nan
-            overlay = edges
-
-        abs_max = np.percentile(np.abs(data), percentile)
-        abs_min = abs_max
-        cp = ax.imshow(data, extent=extent, interpolation='none', cmap=cmap, vmin=-abs_min, vmax=abs_max)    
-        ax.imshow(overlay, extent=extent, interpolation='none', cmap=cmap_xi, alpha=1.0)
-
+    def plot_mask(data, ax, extent=None, dilation=3.0, alpha=0.5):
+        data = data[0]
+        mean = data if len(data.shape) == 2 else np.mean(data, axis=-1)
+        in_image_upscaled = transform.rescale(mean, dilation, mode="constant")
+        mask = feature.canny(in_image_upscaled).astype(float)
+        mask[mask < 0.5] = np.nan
+        # plot
+        cmap = plt.get_cmap("Greys_r")
+        ax.imshow(mask, extent=extent, interpolation="none", cmap=cmap, alpha=alpha)
         return ax
 
     @staticmethod
-    def plot_importance_(importance, title, ax, **kwarg):
+    def plot_importance_(importance, title, ax, extent=None, **kwarg):
         ax.set_title(title, fontsize=20)
-        ax.set_xticks([], [])
-        ax.set_yticks([], [])
-        # plt.setp(ax.get_xticklabels(), visible=False)
-        # plt.setp(ax.get_yticklabels(), visible=False)
-        cp = ax.imshow(importance, interpolation="none", norm=matplotlib.colors.DivergingNorm(0), **kwarg)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        cp = ax.imshow(importance, extent=extent, interpolation="none", **kwarg)
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("top", size="5%", pad=0.05)
-        cbar = plt.colorbar(
-            cp, cax=cax, orientation="horizontal", fraction=0.07, anchor=(1.0, 0.0)
-        )  # , fraction=0.046, pad=0.01)
+        cbar = plt.colorbar(cp, cax=cax, orientation="horizontal", fraction=0.07, anchor=(1.0, 0.0))
         cbar.ax.tick_params(labelsize=13, pad=-1, direction="in")
         cax.xaxis.set_ticks_position("top")
         cax.xaxis.set_label_position("top")
@@ -129,8 +121,8 @@ class ImagePlot(object):
     def plot_instances(cls, x_=None, y_=None, ax=None):
         if ax is None:
             fig, ax = plt.subplots(figsize=(5, 5))
-        ax.set_xticks([], [])
-        ax.set_yticks([], [])
+        ax.set_xticks([])
+        ax.set_yticks([])
         ax.set_title(y_, fontsize=18)
         colors = matplotlib.cm.get_cmap("Greys", 200)
         scale_color = [*range(0, 100, 8)] + [*range(100, 200, 1)]
@@ -239,7 +231,7 @@ class GridPlot(object):
 
         if y_discrete:
             handles, labels = ax[0, 1].get_legend_handles_labels()
-            fig.legend(handles, labels, loc="upper center", borderaxespad=0.1, ncol=10)  
+            fig.legend(handles, labels, loc="upper center", borderaxespad=0.1, ncol=10)
         plt.subplots_adjust(top=0.96, bottom=0.06, left=0.06, right=0.97)
         if cp is not None:
             return ax, cp
@@ -292,7 +284,7 @@ class GridPlot(object):
 
         selections = indices_cols
 
-        fig, axis = plt.subplots(1, n_cols, sharex="col", sharey='row', squeeze=False, figsize=figsize)
+        fig, axis = plt.subplots(1, n_cols, sharex="col", sharey="row", squeeze=False, figsize=figsize)
         axis = axis.flatten()
 
         for i, col1 in enumerate(selections):
@@ -483,57 +475,72 @@ class ExplainText(object):
         from IPython.core.display import HTML
 
         # Color scale.
-        n = 102
-        n_f = 34
+        n = 100
+        value = 150
         r_ = np.concatenate(
-            (
-                np.linspace(130, 160, n),
-                np.linspace(160, 255, n),
-                [255] * (2 * n_f),
-                np.linspace(255, 0, n_f),
-                np.array([0] * n * 2),
+            (   
+                [255] * (4 * n),
+                np.linspace(255, value, n),
+                np.linspace(value, 75, n),
+                np.linspace(75, 50,  n),
+                np.linspace(50, 0, n),
             )
         ).astype(np.int)
         g_ = np.concatenate(
             (
-                np.array([0] * 2 * n),
-                np.linspace(0, 255, n_f),
-                [255] * (n_f),
-                np.linspace(255, 0, n_f),
-                np.array([0] * 2 * n),
+                np.linspace(0, 50, n),
+                np.linspace(50, 75, n),
+                np.linspace(75, value, n),
+                np.linspace(value, 255, n),
+                np.linspace(255, value, n),
+                np.linspace(value, 75, n),
+                np.linspace(75, 50, n),
+                np.linspace(50, 0, n),
             )
         ).astype(np.int)
         b_ = np.concatenate(
             (
-                np.array([0] * 2 * n),
-                np.linspace(0, 255, n_f),
-                [255] * (2 * n_f),
-                np.linspace(255, 160, n),
-                np.linspace(160, 130, n),
+                np.linspace(0, 50, n),
+                np.linspace(50, 75, n),
+                np.linspace(75, value, n),
+                np.linspace(value, 255, n),
+                [255] * (4 * n)
             )
         ).astype(np.int)
-
+        
         def f(x):
-            result = np.array(2.5 * n * x + 2.5 * n)
+            result = np.array(4 * n * x + 4 * n)
             result = result.astype(np.int)
             return result
 
         indices = f(np.array(importances))
 
         def html_color(indices, words):
-            background = """
-            background-image: linear-gradient(90deg,
+            """background-image: linear-gradient(90deg,
             rgba(130, 0, 0, 0.5), rgb(160, 0, 0, 0.5), rgba(255, 0, 0, 0.5),
             rgb(255, 255, 225, 0.5),
             rgba(0, 0, 255, 0.5), rgba(0, 0, 160, 0.5), rgba(0, 0, 130, 0.5))"""
+            
+            background = f"""
+            background-image: linear-gradient(90deg,
+            rgb(255, 0, 0),
+            rgb(255, 50, 50),
+            rgb(255, 75, 75),
+            rgb(255, {value}, {value}),
+            rgb(255, 255, 255),
+            rgb({value}, {value}, 255),
+            rgb(75, 75, 255),
+            rgb(50, 50, 255),
+            rgb(0, 0, 255)
+            )"""
 
             string = ""
             for e, word in zip(indices, words):
                 str_ = f"""
-                <div style="background-color:rgba({r_[e]}, {g_[e]}, {b_[e]}, 0.5);
+                <div style="background-color:rgba({r_[e]}, {g_[e]}, {b_[e]}, 1.0);
                 padding:0px 2px 0px 2px;
                 margin:2px 2px 0px 0px">
-                <span style="color:black; font: 400 8px/0.85rem  sans-serif;">{word} </span>
+                <span style="color:black; font: 400 8px/0.85rem  serif;">{word} </span>
                 </div>
                 """
                 string += str_
@@ -545,9 +552,9 @@ class ExplainText(object):
             </span>
             <div style="{background}; width:80%; height:10px">  </div>
             <div style="display: flex; width:82%; flex-direction: row; justify-content: space-between"> 
-            <span style="color:black; font: 400 8px/0.85rem  sans-serif;"> -1.0 </span>
-            <span style="color:black; font: 400 8px/0.85rem  sans-serif;"> 0.0 </span>
-            <span style="color:black; font: 400 8px/0.85rem  sans-serif;"> +1.0 </span>
+            <span style="color:black; font: 400 8px/0.85rem  serif;"> -1.0 </span>
+            <span style="color:black; font: 400 8px/0.85rem  serif;"> 0.0 </span>
+            <span style="color:black; font: 400 8px/0.85rem  serif;"> +1.0 </span>
             </div>
 
             <div style="display:flex; flex-wrap:wrap"> {string}   

@@ -204,7 +204,6 @@ class Explainer:
 
     def plot_convergence(self, x_set, y_p, diff_importance, error_local_model):
         from matplotlib import pyplot as plt
-
         fig, axs = plt.subplots(2, 2, figsize=(6, 6))
         axs[0, 0].scatter(x_set[:, 0], x_set[:, 1], c=y_p, s=10)
         axs[0, 0].scatter([x_set[0, 0]], [x_set[0, 1]], s=20, c="red")
