@@ -4,7 +4,7 @@ if not os.path.exists('submodules/innvestigate/innvestigate'):
 
 import sys
 sys.path.append('submodules/innvestigate')
-sys.path.append('m-lime')
+sys.path.append('.')
 
 import imp
 import numpy as np
@@ -61,17 +61,19 @@ if keras.backend.image_data_format == "channels_first":
 else:
     input_shape = (28, 28, 1)
 
-path_ = "m-lime/experiments/"
-os.makedirs("m-lime/experiments/pretrained", exist_ok=True)
-model_path = 'm-lime/experiments/pretrained/cnn.keras'
+path_ = "experiments/"
+os.makedirs(f"{path_}pretrained", exist_ok=True)
+model_path = f"{path_}pretrained/cnn.keras"
 
 # Hack to make `model_wo_softmax` work for models loaded from disc
 model = keras.models.Sequential([
     keras.layers.Conv2D(32, (3, 3), activation="relu", input_shape=input_shape),
     keras.layers.Conv2D(64, (3, 3), activation="relu"),
     keras.layers.MaxPooling2D((2, 2)),
+    keras.layers.Dropout(0.25),
     keras.layers.Flatten(),
-    keras.layers.Dense(512, activation="relu"),
+    keras.layers.Dense(128, activation="relu"),
+    keras.layers.Dropout(0.5),
     keras.layers.Dense(10, activation="softmax"),
 ])
 
@@ -87,7 +89,6 @@ else:
     scores = mnistutils.train_model(model, data, batch_size=128, epochs=20)
     print("Scores on test set: loss=%s accuracy=%s" % tuple(scores))
     model.save(model_path)
-
 
 # # # # # #
 # Analysis setup 
@@ -158,10 +159,16 @@ for method in methods:
 n = 10
 test_images = list(zip(data[2][:n], data[3][:n]))
 
+
 analysis = np.zeros([len(test_images), len(analyzers)+1, 28, 28, 3])
 text = []
 
+os.makedirs(f"{path_}figures", exist_ok=True)
 for i, (x, y) in enumerate(test_images):
+    np.save(f"{path_}figures/test_image_{i}_{y}.np", x)
+
+for i, (x, y) in enumerate(test_images):
+    np.save(f"test_image_{i}.numpy", x)
     # Add batch axis.
     x = x[None, :, :, :]
 
@@ -190,6 +197,8 @@ for i, (x, y) in enumerate(test_images):
         # Store the analysis.
         analysis[i, aidx] = a[0]
 
+
+# # # # # # #
 # MeLIME
 def model_predict(x_e):
     prob = model.predict_on_batch(x_e)
@@ -207,7 +216,6 @@ if os.path.exists(vae_gen_path):
 else:
     generator.fit(x_train, epochs=20)
     generator.save_manifold(vae_gen_path)
-
 
 
 def explanation_melime(x_explain):
