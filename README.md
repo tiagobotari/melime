@@ -1,13 +1,8 @@
-# Meaningful Local Explanation for MachineLearning Models
+# Meaningful Local Explanation for Machine Learning Models
 
-In this project, we propose a better sampling strategy for generating explanations.
-In particular, we propose to sample data that are more likely to live on the
-manifold of the real data distribution.
+In this project,  we introduce strategies to improve local explanations taking into account the  distribution  of  the  data (on the manifold) used  to  train  the  black-box models. MeLIME, produces more meaningful explanations compared to other techniques over different ML models,  operating on various types of data.  MeLIME generalizes the LIME (https://github.com/marcotcr/lime) method, allowing more flexible perturbation sampling and the use of  different  local  interpretable  models.   Additionally,  we  introduce modifications  to standard training algorithms of local interpretable models fostering more robust explanations,  even  allowing  the  production  of counterfactual  examples.
 
-
-
-
-
+## Examples
 
 
 
