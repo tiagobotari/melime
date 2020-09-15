@@ -31,7 +31,7 @@ This will download the module to the directory `submodules/innvestigate`.
 Afterwards, the script can be run from the root directory: 
 
 ```bash
-> python m-lime/experiments/ex_mnist_cnn_innvestigate.py
+> python melime/experiments/ex_mnist_cnn_innvestigate.py
 ```
 
 This will plot the result using `matplotlib`.
