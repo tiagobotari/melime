@@ -2,8 +2,11 @@
 
 In this project,  we introduce strategies to improve local explanations taking into account the  distribution  of  the  data (on the manifold) used  to  train  the  black-box models. MeLIME, produces more meaningful explanations compared to other techniques over different ML models,  operating on various types of data.  MeLIME generalizes the LIME (https://github.com/marcotcr/lime) method, allowing more flexible perturbation sampling and the use of  different  local  interpretable  models.   Additionally,  we  introduce modifications  to standard training algorithms of local interpretable models fostering more robust explanations,  even  allowing  the  production  of counterfactual  examples.
 
+The preprint of the paper is available on https://arxiv.org/abs/2009.05818
+
 ## Examples
 
+The examples are on the folder /melime/experiments.
 
 
 ### Running the Innvestigate experiment
