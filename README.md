@@ -8,6 +8,13 @@ The preprint of the paper is available on https://arxiv.org/abs/2009.05818
 
 The examples are on the folder /melime/experiments.
 
+## How to install using python virtual venv
+
+> git clone https://github.com/tiagobotari/melime.git
+> cd melime
+> python3.7 -m venv venv
+> python setup.py install 
+
 
 ### Running the Innvestigate experiment
 
