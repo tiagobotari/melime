@@ -4,9 +4,6 @@ In this project,  we introduce strategies to improve local explanations taking i
 
 The preprint of the paper is available on https://arxiv.org/abs/2009.05818
 
-## Examples
-
-The examples are on the folder /melime/experiments.
 
 ## How to install using python virtual venv
 
@@ -16,6 +13,10 @@ cd melime
 python3.7 -m venv venv
 python setup.py install 
 ```
+
+## Examples
+
+The examples are on the folder /melime/experiments.
 
 ### Running the Innvestigate experiment
 
