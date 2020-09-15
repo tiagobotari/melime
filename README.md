@@ -11,12 +11,22 @@ The preprint of the paper is available on https://arxiv.org/abs/2009.05818
 git clone https://github.com/tiagobotari/melime.git
 cd melime
 python3.7 -m venv venv
+source venv/bin/activate
 python setup.py install 
 ```
 
 ## Examples
 
-The examples are on the folder /melime/experiments.
+The examples are on experiments folder and can be run using jupyter notebook.  
+
+```
+pip install jupyter
+jupyter notebook
+```
+
+then open one of the experiment files.
+
+
 
 ### Running the Innvestigate experiment
 
