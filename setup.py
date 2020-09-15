@@ -23,7 +23,8 @@ if __name__ == "__main__":
             "torch>=1.3",
             "torchvision>=0.4",
             "numpy>=1.17",
-            "matplotlib"
+            "matplotlib",
+            "scikit-image>=0.17.2",
             ]
         , python_requires=">=3.6"
     )
