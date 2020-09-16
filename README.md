@@ -4,14 +4,33 @@ In this project,  we introduce strategies to improve local explanations taking i
 
 The preprint of the paper is available on https://arxiv.org/abs/2009.05818
 
+
+## How to install using python virtual environment
+
+```
+git clone https://github.com/tiagobotari/melime.git
+cd melime
+python3.7 -m venv venv
+source venv/bin/activate
+python setup.py install 
+```
+
 ## Examples
 
-The examples are on the folder /melime/experiments.
+The examples are on experiments folder and can be run using jupyter notebook.  
+
+```
+pip install jupyter
+jupyter notebook
+```
+
+then open one of the experiment files.
+
 
 
 ### Running the Innvestigate experiment
 
-The experiment in the file `m-lime/experiments/ex_mnist_cnn_innvestigate.py` needs the [`innvestigate`]() framework.
+The experiment in the file `melime/experiments/ex_mnist_cnn_innvestigate.py` needs the [`innvestigate`]() framework.
 To install it, run the following command: 
 
 ```bash
@@ -22,14 +41,14 @@ This will download the module to the directory `submodules/innvestigate`.
 Afterwards, the script can be run from the root directory: 
 
 ```bash
-> python m-lime/experiments/ex_mnist_cnn_innvestigate.py
+> python melime/experiments/ex_mnist_cnn_innvestigate.py
 ```
 
 This will plot the result using `matplotlib`.
 If you want to output a pdf, then prepend the command as follows:
 
 ```bash
-> PLOTFILENAME="output.pdf" python m-lime/experiments/ex_mnist_cnn_innvestigate.py
+> PLOTFILENAME="output.pdf" python melime/experiments/ex_mnist_cnn_innvestigate.py
 ```
 
 
