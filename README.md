@@ -38,7 +38,7 @@ Go to this [example](doc/html/ex_image_vae_mnist.html).
 
 Local explanation for an instance $x^∗=(6.0,3.0,5.0,1.5)$ produced by an RF model trained on the Iris dataset. MeLIME using KDEPCAGen and a linear model as local model; MeLIME using KDEPCAGen and a decision tree as local model.
 
-<img src="doc/images/iris_importances.png" alt="drawing" width="800"/>
+<img src="doc/images/iris_importances.png" alt="drawing" width="500"/>
 
 Go to this [example](doc/html/ex_lime_tabular_classification_density_kde_pca_kpca_iris.html).
 
@@ -46,7 +46,7 @@ Go to this [example](doc/html/ex_lime_tabular_classification_density_kde_pca_kpc
 
  MeLIME local explanations produced for a CNN model trained over the MNIST dataset. An image (numberfive) and the produced explanations with counterfactual examples  for  the  top  three  predictions:  (a)  number  five;  (b) number six; and (c) number eight.
 
-<img src="doc/images/cnn_MNIST.png" alt="drawing" width="800"/>
+<img src="doc/images/cnn_MNIST.png" alt="drawing" width="600" class="center"/>
 
 Go to this [example](doc/html/ex_image_vae_mnist.html).
 
