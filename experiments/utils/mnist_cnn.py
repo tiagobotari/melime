@@ -17,7 +17,6 @@ from torch.optim.lr_scheduler import StepLR
 
 class Net(nn.Module):
     def __init__(self):
-
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(1, 32, 3, 1)
         self.conv2 = nn.Conv2d(32, 64, 3, 1)
@@ -52,9 +51,15 @@ def train(model, device, train_loader, optimizer, epoch, log_interval=10):
         loss.backward()
         optimizer.step()
         if batch_idx % log_interval == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(train_loader.dataset),
-                100. * batch_idx / len(train_loader), loss.item()))
+            print(
+                "Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}".format(
+                    epoch,
+                    batch_idx * len(data),
+                    len(train_loader.dataset),
+                    100.0 * batch_idx / len(train_loader),
+                    loss.item(),
+                )
+            )
 
 
 def test(model, device, test_loader):
@@ -65,38 +70,30 @@ def test(model, device, test_loader):
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             output = model(data)
-            test_loss += F.nll_loss(output, target, reduction='sum').item()  # sum up batch loss
-            pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
+            test_loss += F.nll_loss(output, target, reduction="sum").item()
+            pred = output.argmax(dim=1, keepdim=True)
             correct += pred.eq(target.view_as(pred)).sum().item()
-
     test_loss /= len(test_loader.dataset)
-
-    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-        test_loss, correct, len(test_loader.dataset),
-        100. * correct / len(test_loader.dataset)))
+    print(
+        "\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n".format(
+            test_loss, correct, len(test_loader.dataset), 100.0 * correct / len(test_loader.dataset)
+        )
+    )
 
 
 def train_model(
-    train_loader,
-    test_loader,
-    device="cpu", 
-    gamma=0.7, 
-    seed=1.0, 
-    log_interval=100, 
-    lr=0.5,
-    epochs=10,
-    path=None
-    ):
-    if not device in ['cuda', 'cpu']:
-        raise Exception("Please choose one valid device. The options are: cuda and cpu")      
-    
-    if device == 'cuda':
+    train_loader, test_loader, device="cpu", gamma=0.7, seed=1.0, log_interval=100, lr=0.5, epochs=10, path=None
+):
+    if not device in ["cuda", "cpu"]:
+        raise Exception("Please choose one valid device. The options are: cuda and cpu")
+
+    if device == "cuda":
         use_cuda = torch.cuda.is_available()
         if use_cuda is False:
             warnings.warn("Cuda is not available. Using the cpu device instead")
     device = torch.device("cuda" if use_cuda else "cpu")
-    kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
-    print('device:', device)
+    kwargs = {"num_workers": 1, "pin_memory": True} if use_cuda else {}
+    print("device:", device)
     model = Net().to(device)
     optimizer = optim.Adadelta(model.parameters(), lr=lr)
 
@@ -108,6 +105,7 @@ def train_model(
     if path is not None:
         torch.save(model.state_dict(), path)
     return model
+
 
 def model_load(device, path):
     model = Net().to(device)
