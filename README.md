@@ -27,6 +27,11 @@ jupyter notebook
 then open one of the experiment files.
 
 
+### Regression Task - Toy Model - Spiral Length
+
+![Spiral-Length](doc/images/figure_spiral.png)
+
+
 
 ### Running the Innvestigate experiment
 
