@@ -30,7 +30,7 @@ then open one of the experiment files.
 ### Regression Problem: Toy Model - Spiral Length
 Data generated from a toy model- Length of Spiral. The color scale corresponds to the predictedvalues of a MPL model. The red star represents a data point $x^∗= (0,8)$, and the gray points the sampled data from KDEGen.Explanations produced for an instance $x^*$ using MeLIME methodology with KDEGen and a linear model as local model.
 
-<img src="doc/images/figure_spiral.png" alt="drawing" width="100"/>
+<img src="doc/images/figure_spiral.png" alt="drawing" width="300"/>
 
 Go to this [example](doc/html/ex_image_vae_mnist.html).
 
@@ -38,7 +38,7 @@ Go to this [example](doc/html/ex_image_vae_mnist.html).
 
 Local explanation for an instance $x^∗=(6.0,3.0,5.0,1.5)$ produced by an RF model trained on the Iris dataset. MeLIME using KDEPCAGen and a linear model as local model; MeLIME using KDEPCAGen and a decision tree as local model.
 
-![Iris](doc/images/iris_importances.png)
+<img src="doc/images/iris_importances.png" alt="drawing" width="300"/>
 
 Go to this [example](doc/html/ex_lime_tabular_classification_density_kde_pca_kpca_iris.html).
 
@@ -46,7 +46,7 @@ Go to this [example](doc/html/ex_lime_tabular_classification_density_kde_pca_kpc
 
  MeLIME local explanations produced for a CNN model trained over the MNIST dataset. An image (numberfive) and the produced explanations with counterfactual examples  for  the  top  three  predictions:  (a)  number  five;  (b) number six; and (c) number eight.
 
-![MNIST](doc/images/cnn_MNIST.png)
+<img src="doc/images/cnn_MNIST.png" alt="drawing" width="300"/>
 
 Go to this [example](doc/html/ex_image_vae_mnist.html).
 
@@ -54,7 +54,8 @@ Go to this [example](doc/html/ex_image_vae_mnist.html).
 
 A local explanation was produced using MeLIME for a Naive Bayes classifier model trained on sentences frommovie-reviews of the Rotten Tomatoes website (Website; Pang and Lee 2005). Words/positions showed as reddish color, if changed, are likely to turn the sentence negative while bluish color to become the sentence positive.
 
-![Movie-Review](doc/images/explanation_text.png)
+
+<img src="doc/images/explanation_text.png" alt="drawing" width="300"/>
 
 Go to this [example](ex_word2vec_rotten_tomatos.html).
 
