@@ -82,7 +82,7 @@ class KDEGen(GenBase):
         if self.manifold.kernel not in ["gaussian", "tophat"]:
             raise NotImplementedError()
 
-        # TODO: TB comment.
+        # TODO:
         #  Select the automatically the ball to find the kernel. Not sure if this is the best strategy.
         ind_ = None
         if r is None:
@@ -95,8 +95,8 @@ class KDEGen(GenBase):
         else:
             ind_ = self.manifold.tree_.query_radius(x_exp, r=r, return_distance=False)[0].astype(int)
 
-        # TODO: TB: Make the selection from the tree structure.
-        # TODO: TB: For now the three is transformed into numpy array, it is slow.
+        # TODO: Make the selection from the tree structure.
+        # TODO: For now the three is transformed into numpy array, it is slow.
         # TODO: data = np.asarray(self.tree_.data[ind_])
         data = np.asarray(self.manifold.tree_.data)  # TODO: Coping all the three. Not good!
         data = data[ind_]

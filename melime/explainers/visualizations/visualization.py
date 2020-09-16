@@ -449,26 +449,6 @@ def simpleaxis(ax):
     ax.spines["left"].set_visible(False)
 
 
-class SparseMatrix(object):
-    """
-    Transformation to be used in a sklearn pipeline
-    check if a array is sparse.
-    # TODO: The NLS, LLS, NNPredict should accept sparse array
-    """
-
-    def __init__(self):
-        pass
-
-    def fit(self):
-        return self
-
-    @staticmethod
-    def transform(x):
-        if issparse(x):
-            return x.toarray()
-        return x
-
-
 class ExplainText(object):
     @classmethod
     def plot(cls, importances, words):
@@ -544,7 +524,6 @@ class ExplainText(object):
                 </div>
                 """
                 string += str_
-            # width:300px;
             string = f"""
             <div style="display:flex;  flex-direction:column; align-items:center">
             <span style="color:black">

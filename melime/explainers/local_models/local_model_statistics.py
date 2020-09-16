@@ -8,7 +8,7 @@ class BasicStatistics(LocalModelBase):
     Basic descriptive statistics for generating explanation.
     """
 
-    # TODO: See “Algorithms for computing the sample variance: Analysis and recommendations.” for improments.
+    # TODO: See paper “Algorithms for computing the sample variance: Analysis and recommendations.” for improments.
     def __init__(
         self,
         x_explain,
@@ -80,7 +80,7 @@ class BasicStatistics(LocalModelBase):
         return results
 
     def partial_fit(self, x_set, y_set, weight_set=None):
-        # TODO: I need to improve this. Maybe put a matrix here with the positions.
+        # TODO: Need to improve this. Maybe put a matrix here with the positions.
         for x_i, y_i in zip(x_set, y_set):
             if x_i[0] in self.values:
                 self.values[x_i[0]].append(y_i)

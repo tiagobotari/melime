@@ -121,9 +121,6 @@ class ModelCBOW(object):
             train_loss += current_loss
             self.optimizer.step()
 
-        #             if self.verbose:
-        #                 if batch_idx % self.interval_print == 0:
-        #                     print(f'Train Epoch: {epoch} \tLoss: {current_loss}')
         if self.verbose:
             print(f"Epoch: {epoch} - current_loss loss: {current_loss}")
 

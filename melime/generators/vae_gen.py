@@ -44,7 +44,6 @@ class VAEGen(GenBase):
             x_p = self.model.model.decode(z)
             x_sample = x_p.reshape(-1, self.model.input_dim).to(self.model.device_cpu).detach().numpy()
         # Clean cache torch.
-        # TODO: TB: what is the best practice?
         del x_p
         del noise
         del mu_m

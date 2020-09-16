@@ -36,7 +36,6 @@ class CNNVAEGen(GenBase):
             x_sample = self.model.model.decode(z)
 
         # Clean cache torch.
-        # TODO: TB: what is the best practice to clean cash, is it really necessary?
         del noise
         del mu_m
         torch.cuda.empty_cache()
@@ -210,8 +209,6 @@ class VAE(nn.Module):
                 nn.ConvTranspose2d(
                     out_channels[-1], out_channels[-1], kernel_size=3, stride=2, padding=1, output_padding=1
                 ),
-                # TODO: I remove that, but not sure what to do, I want to improve the resolution.
-                #                             nn.BatchNorm2d(out_chanels[-1]),
                 nn.LeakyReLU(),
                 nn.Conv2d(out_channels[-1], out_channels=self.image_channels, kernel_size=3, padding=1),
                 nn.Sigmoid(),
