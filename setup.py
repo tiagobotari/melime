@@ -25,6 +25,7 @@ if __name__ == "__main__":
             "numpy>=1.17",
             "matplotlib",
             "scikit-image>=0.17.2",
+            "gensim",
             ]
         , python_requires=">=3.6"
     )
