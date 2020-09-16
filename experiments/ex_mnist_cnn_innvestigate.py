@@ -168,7 +168,6 @@ for i, (x, y) in enumerate(test_images):
     np.save(f"{path_}figures/test_image_{i}_{y}.np", x)
 
 for i, (x, y) in enumerate(test_images):
-    np.save(f"test_image_{i}.numpy", x)
     # Add batch axis.
     x = x[None, :, :, :]
 
@@ -210,7 +209,7 @@ y_train = data[1]
 
 # Training the VAEGen
 vae_gen_path = f"{path_}pretrained/vae_gen_mnist_innvestigate1.melime"
-generator = VAEGen(input_dim=784, verbose=True, device='cuda')
+generator = VAEGen(input_dim=784, verbose=True, device='cpu')
 if os.path.exists(vae_gen_path): 
     generator = generator.load_manifold(vae_gen_path)
 else:
