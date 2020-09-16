@@ -38,6 +38,13 @@ To install it, run the following command:
 ```
 This will download the module to the directory `submodules/innvestigate`.
 
+You may need to install tensorflow 1.15 and keras 2.3.1:
+
+```
+pip install tensorflow==1.15
+pip install keras==2.3.1
+```
+
 Afterwards, the script can be run from the root directory: 
 
 ```bash
