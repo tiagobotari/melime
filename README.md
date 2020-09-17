@@ -34,7 +34,7 @@ Data generated from a toy model- Length of Spiral. The color scale corresponds t
 <img src="doc/images/figure_spiral.png" alt="drawing" width="800"/>
 </div>
 
-Go to this [example](doc/html/ex_image_vae_mnist.html).
+Go to this [example](https://tiagobotari.github.io/melime/doc/html/ex_image_vae_mnist.html).
 
 ### Classification Problem: Iris Dataset
 
@@ -48,7 +48,7 @@ Go to this [example](doc/html/ex_lime_tabular_classification_density_kde_pca_kpc
 
  MeLIME local explanations produced for a CNN model trained over the MNIST dataset. An image (numberfive) and the produced explanations with counterfactual examples  for  the  top  three  predictions:  (a)  number  five;  (b) number six; and (c) number eight.
 
-<img src="doc/images/cnn_MNIST.png" alt="drawing" width="600" class="center"/>
+<img src="https://tiagobotari.github.io/melime/doc/images/cnn_MNIST.png" alt="drawing" width="600" class="center"/>
 
 Go to this [example](doc/html/ex_image_vae_mnist.html).
 
@@ -57,7 +57,7 @@ Go to this [example](doc/html/ex_image_vae_mnist.html).
 A local explanation was produced using MeLIME for a Naive Bayes classifier model trained on sentences frommovie-reviews of the Rotten Tomatoes website (Website; Pang and Lee 2005). Words/positions showed as reddish color, if changed, are likely to turn the sentence negative while bluish color to become the sentence positive.
 
 
-<img src="doc/images/explanation_text.png" alt="drawing" width="800"/>
+<img src="https://tiagobotari.github.io/melime/doc/images/explanation_text.png" alt="drawing" width="800"/>
 
 Go to this [example](ex_word2vec_rotten_tomatos.html).
 
