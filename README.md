@@ -34,7 +34,7 @@ Data generated from a toy model- Length of Spiral. The color scale corresponds t
 <img src="doc/images/figure_spiral.png" alt="drawing" width="800"/>
 </div>
 
-Go to this [example](https://tiagobotari.github.io/melime/doc/ex_image_vae_mnist.html).
+Go to this [example](https://tiagobotari.github.io/melime/doc/ex_lime_tabular_regression_kde_spiral.html).
 
 ### Classification Problem: Iris Dataset
 
