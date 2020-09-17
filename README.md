@@ -28,7 +28,7 @@ then open one of the experiment files.
 
 
 ### Regression Problem: Toy Model - Spiral Length
-Data generated from a toy model- Length of Spiral. The color scale corresponds to the predictedvalues of a MPL model. The red star represents a data point $x^∗= (0,8)$, and the gray points the sampled data from KDEGen.Explanations produced for an instance $x^*$ using MeLIME methodology with KDEGen and a linear model as local model.
+Data generated from a toy model- Length of Spiral. The color scale corresponds to the predictedvalues of a MPL model. The red star represents a data point <img src="https://render.githubusercontent.com/render/math?math=x^∗=(0,8)">, and the gray points the sampled data from KDEGen.Explanations produced for an instance  <img src="https://render.githubusercontent.com/render/math?math=x^∗"> using MeLIME methodology with KDEGen and a linear model as local model.
 
 <div style="text-align: center">
 <img src="doc/images/figure_spiral.png" alt="drawing" width="800"/>
@@ -38,7 +38,7 @@ Go to this [example](https://tiagobotari.github.io/melime/doc/ex_lime_tabular_re
 
 ### Classification Problem: Iris Dataset
 
-Local explanation for an instance $x^∗=(6.0,3.0,5.0,1.5)$ produced by an RF model trained on the Iris dataset. MeLIME using KDEPCAGen and a linear model as local model; MeLIME using KDEPCAGen and a decision tree as local model.
+Local explanation for an instance <img src="https://render.githubusercontent.com/render/math?math=x^∗=(6.0,3.0,5.0,1.5)"> produced by an RF model trained on the Iris dataset. MeLIME using KDEPCAGen and a linear model as local model; MeLIME using KDEPCAGen and a decision tree as local model.
 
 <img src="doc/images/iris_importances.png" alt="drawing" width="500"/>
 
