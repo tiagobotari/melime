@@ -29,9 +29,9 @@ then open one of the experiment files.
 
 ### Regression Problem: Toy Model - Spiral Length
 Data generated from a toy model- Length of Spiral. The color scale corresponds to the predictedvalues of a MPL model. The red star represents a data point $x^∗= (0,8)$, and the gray points the sampled data from KDEGen.Explanations produced for an instance $x^*$ using MeLIME methodology with KDEGen and a linear model as local model.
-
+<div style="text-align: center">
 <img src="doc/images/figure_spiral.png" alt="drawing" width="800"/>
-
+</div>
 Go to this [example](doc/html/ex_image_vae_mnist.html).
 
 ### Classification Problem: Iris Dataset
