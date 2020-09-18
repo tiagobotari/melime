@@ -40,7 +40,6 @@ Go to this [example](https://tiagobotari.github.io/melime/doc/ex_lime_tabular_re
 
 Local explanation for an instance <img src="https://render.githubusercontent.com/render/math?math=x*=(6.0,3.0,5.0,1.5)"> produced by an RF model trained on the Iris dataset. MeLIME using KDEPCAGen and a linear model as local model; MeLIME using KDEPCAGen and a decision tree as local model.
 
-Table:  The original phrase to be explained; Favorable and unfavorable phrases are generated for predicting the sentence as positive.
 <img src="doc/images/iris_importances.png" alt="drawing" width="500"/>
 
 Go to this [example](https://tiagobotari.github.io/melime/doc/ex_lime_tabular_classification_density_kde_pca_kpca_iris.html).
@@ -59,6 +58,8 @@ A local explanation was produced using MeLIME for a Naive Bayes classifier model
 
 
 <img src="doc/images/explanation_text.png" alt="drawing" width="800"/>
+
+Table:  The original phrase to be explained; Favorable and unfavorable phrases are gener-ated for predicting the sentence as positive.
 
 <img src="https://github.com/tiagobotari/melime/blob/gh-pages/doc/text_examples.png" alt="drawing" width="800"/>
 
