@@ -46,7 +46,7 @@ Go to this [example](https://tiagobotari.github.io/melime/doc/ex_lime_tabular_cl
 
 ###  Classification of Images: MNIST Dataset
 
- MeLIME local explanations produced for a CNN model trained over the MNIST dataset. An image (numberfive) and the produced explanations with counterfactual examples  for  the  top  three  predictions:  (a)  number  five;  (b) number six; and (c) number eight.
+ MeLIME local explanations produced for a CNN model trained over the MNIST dataset. An image (numberfive) and the produced explanations with counterfactual examples  for  the  top  three  predictions: (a) original image; (b) number five; (c) number nine; and (d) number eight.
 
 <img src="doc/images/cnn_MNIST.png" alt="drawing" width="600" class="center"/>
 
