@@ -71,7 +71,7 @@ MeLIME comparation with other methodologies for a CNN model trained on MNIST dat
 
 ![comparation](doc/images/MNIST_comparing.png)
 
-The experiment in the file `melime/experiments/ex_mnist_cnn_innvestigate.py` needs the [`innvestigate`]() framework.
+The experiment in the file `melime/experiments/ex_mnist_cnn_innvestigate.py` needs the [`innvestigate`](https://github.com/albermax/innvestigate) framework.
 To install it, run the following command: 
 
 ```bash
