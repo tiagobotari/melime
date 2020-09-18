@@ -59,6 +59,8 @@ A local explanation was produced using MeLIME for a Naive Bayes classifier model
 
 <img src="doc/images/explanation_text.png" alt="drawing" width="800"/>
 
+<img src="https://github.com/tiagobotari/melime/blob/gh-pages/doc/text_examples.png" alt="drawing" width="800"/>
+
 Go to this [example](https://tiagobotari.github.io/melime/doc/ex_word2vec_rotten_tomatos.html).
 
 ### Running the Innvestigate experiment
