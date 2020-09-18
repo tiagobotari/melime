@@ -79,7 +79,7 @@ To install it, run the following command:
 ```
 This will download the module to the directory `submodules/innvestigate`.
 
-For running this specific experiment you may need to install tensorflow 1.15 and keras 2.3.1:
+For running this specific experiment, you may need to install tensorflow 1.15 and keras 2.3.1:
 
 ```
 pip install tensorflow==1.15
