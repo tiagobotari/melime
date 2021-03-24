@@ -4,6 +4,25 @@ In this project,  we introduce strategies to improve local explanations taking i
 
 The preprint of the paper is available on https://arxiv.org/abs/2009.05818
 
+## MeLIME Features 
+
+You can generate explanations using different local interpretable models:
+
+1. Linear Model;
+2. Decision tree;
+3. Basic Statistical Measurements.
+
+You can also easily implement your own. 
+
+To create the meaningful feature space for your ML model, it is available four strategies:
+
+1. KDEGen: a kernel density estimator (KDE);
+2. KDEPACGen: KDE with a PCA transformation;
+3. VAEGen: a Variational Auto Encoder;
+4. Word2VecGen: where a word2vec is used to represent tokens. 
+
+Again, you can implement your generator as well. 
+
 
 ## How to install using python virtual environment
 
