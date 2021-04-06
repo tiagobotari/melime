@@ -6,6 +6,7 @@ The preprint of the paper is available on https://arxiv.org/abs/2009.05818
 
 ## MeLIME Features 
 
+MeLIME can be applied to any ML model.
 You can generate explanations using different local interpretable models:
 
 1. Linear Model;
