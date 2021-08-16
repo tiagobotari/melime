@@ -7,7 +7,7 @@ from sklearn.decomposition import IncrementalPCA, KernelPCA
 from sklearn.manifold import Isomap
 
 from melime.generators.gen_base import GenBase
-from melime.generators.kde_gen import KDEGen
+from melime.generators.kde_gen_simple import KDEGen
 
 
 class KDEPCAGen(GenBase):
@@ -53,7 +53,8 @@ class KDEKPCAGen(GenBase):
         self.manifold = KDEGen(kernel=self.kernel, bandwidth=self.bandwidth).fit(x_pca)
         return self
 
-    def sample_radius(self, x_exp, n_min_kernels=20, r=None, n_samples=1, random_state=None):
+    def sample_radius(
+            self, x_exp, n_min_kernels=20, r=None, n_samples=1, random_state=None):
         x_exp_pca = self.pca.transform(x_exp)
         x_sample_pca = self.manifold.sample_radius(
             x_exp_pca, n_min_kernels=n_min_kernels, r=r, n_samples=n_samples, random_state=random_state

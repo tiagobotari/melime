@@ -150,7 +150,8 @@ class GridPlot(object):
         y_names={},
         y_discrete=True,
         fig=None,
-        ax=None,
+        axis=None,
+        s=10,
         alpha=1.0,
         figsize=(8, 8),
         colors=None,
@@ -164,7 +165,7 @@ class GridPlot(object):
         :param y_names:
         :param y_discrete:
         :param fig:
-        :param ax:
+        :param axis:
         :param alpha:
         :param figsize:
         :param kwargs:
@@ -174,7 +175,7 @@ class GridPlot(object):
             x_cols_name = np.arange(0, x.shape[1])
         if plot_cols == "all":
             plot_cols = np.arange(0, len(x_cols_name))
-
+        plot_text_id = kwargs.pop('plot_text_id', False)
         if y_discrete:
             unique_y = np.unique(y)
             indices_plot = {y_i: np.argwhere(y == y_i) for y_i in unique_y}
@@ -187,14 +188,14 @@ class GridPlot(object):
 
         selections = list(itertools.combinations_with_replacement(indices_cols, 2))
 
-        if ax is None:
-            fig, ax = plt.subplots(n_cols, n_cols, squeeze=False, figsize=figsize)  # sharex='col', sharey='row'
+        if axis is None:
+            fig, axis = plt.subplots(n_cols, n_cols, squeeze=False, figsize=figsize)  # sharex='col', sharey='row'
         for i, sel in enumerate(selections):
             col1 = sel[0]
             col2 = sel[1]
 
-            axi = ax[col1, col2]
-            axi_inv = ax[col2, col1]
+            axi = axis[col1, col2]
+            axi_inv = axis[col2, col1]
             # configure
             axi_inv.grid(alpha=0.2)
             axi.grid(alpha=0.2)
@@ -204,15 +205,21 @@ class GridPlot(object):
                 cls._plot_histogram(axi, x, col2, y_names, indices_plot, y_discrete, colors_discrete=colors)
             elif y is not None:
                 if y_discrete:
-                    for i, (y_i, indices_i) in enumerate(indices_plot.items()):
-                        color = colors[i]
+                    for ii, (y_i, indices_i) in enumerate(indices_plot.items()):
+                        color = colors[ii]
                         x_ = x[indices_i, col2]
                         y_ = x[indices_i, col1]
+                        if y_names is None:
+                            label_ = None
+                        else:
+                            label_ = y_names.get(y_i, y_i)
 
-                        label_ = y_names.get(y_i, y_i)
-
-                        cp = axi.scatter(x_, y_, label=label_, alpha=alpha, c=color, **kwargs)
-                        cp = axi_inv.scatter(y_, x_, label=label_, alpha=alpha, c=color, **kwargs)
+                        cp = axi.scatter(x_, y_, label=label_, alpha=alpha, c=color, s=s,    **kwargs)
+                        cp = axi_inv.scatter(y_, x_, label=label_, alpha=alpha, c=color, s=s, **kwargs)
+                        if plot_text_id:
+                            for j in range(x_.shape[0]):
+                                axi.annotate(f'{j}', (x_[j], y_[j]))
+                                axi_inv.annotate(f'{j}', (y_[j], x_[j]))
                 else:
                     x_ = x[:, col2]
                     y_ = x[:, col1]
@@ -226,16 +233,16 @@ class GridPlot(object):
                 axi_inv.scatter(y_, x_, alpha=alpha, c=y, **kwargs)
 
         for i, label in enumerate(feature_names):
-            ax[-1, i].set_xlabel(label, fontdict={"fontsize": 12})
-            ax[i, 0].set_ylabel(label, fontdict={"fontsize": 12})
+            axis[-1, i].set_xlabel(label, fontdict={"fontsize": 12})
+            axis[i, 0].set_ylabel(label, fontdict={"fontsize": 12})
 
         if y_discrete:
-            handles, labels = ax[0, 1].get_legend_handles_labels()
+            handles, labels = axis[0, 1].get_legend_handles_labels()
             fig.legend(handles, labels, loc="upper center", borderaxespad=0.1, ncol=10)
         plt.subplots_adjust(top=0.96, bottom=0.06, left=0.06, right=0.97)
         if cp is not None:
-            return ax, cp
-        return ax
+            return fig, axis, cp
+        return fig, axis
 
     @classmethod
     def plot_histogram(
@@ -342,7 +349,10 @@ class GridPlot(object):
                 hist, bins, _, _ = histogram(
                     x_, bins=bin_edges, normalization=normalization, bin_edges=bin_edges, normalize=normalize
                 )
-                label_ = y_names.get(y_i, y_i)
+                if y_names is None:
+                 label_ = None
+                else:
+                    label_ = y_names.get(y_i, y_i)
                 axi.bar(
                     bins,
                     hist,
@@ -356,7 +366,7 @@ class GridPlot(object):
                 width *= delta_width
 
     @classmethod
-    def plot_instance(cls, x_explain, axis):
+    def plot_instance(cls, x_explain, axis, delta=None):
         for i in range(axis.shape[0]):
             for j in range(axis.shape[1]):
                 if i == j:
@@ -364,6 +374,9 @@ class GridPlot(object):
                 else:
                     axis[i, j].scatter([x_explain[j]], [x_explain[i]], s=150, c="red", marker="x")
                     axis[i, j].scatter([x_explain[j]], [x_explain[i]], s=40, c="red")
+                if delta is not None:
+                    axis[i, j].set_xlim(x_explain[j] - delta, x_explain[j] + delta)
+                    axis[i, j].set_ylim(x_explain[i] - delta, x_explain[i] + delta)
 
 
 def histogram(x, bins=15, normalization=None, bin_edges=None, normalize=True):
@@ -543,3 +556,52 @@ class ExplainText(object):
             return HTML(string)
 
         return html_color(indices, words)
+
+
+def plot_importances(importances, feature_names, ):
+    features_names = feature_names
+    fig, axis = plt.subplots(1, 4, figsize=(15, 3))
+    for i, name in enumerate(features_names):
+        mean = np.mean(importances[:, i])
+        sigma = np.std(importances[:, i])
+        axis[i].axvline(mean, c="black", linestyle=':', alpha=0.8)
+        values, bins, patches = axis[i].hist(importances[:, i])
+        means_y = np.max(values) / 2
+        axis[i].set_title(f'mean: {mean:5.3f}; sigma: {sigma:5.3f}')
+        axis[i].plot(
+            [mean - sigma, sigma + mean], [means_y, means_y], "|", c="black", linestyle='-', alpha=0.5)
+        axis[i].set_xlabel(name, fontsize=14)
+        axis[i].set_xticks(bins[::3])
+        axis[i].tick_params(axis='x', labelsize=14)
+        axis[i].tick_params(axis='y', labelsize=14)
+        for tick in axis[i].get_xticklabels():
+            tick.set_rotation(45)
+
+
+def plot_samples(x_sampled, x_explain=None, weights=None, normalize=True):
+    if len(x_sampled.shape) == 1:
+        x_sampled = x_sampled.reshape(-1, 1)
+    n_instances = x_sampled.shape[0]
+    n_features = x_sampled.shape[1]
+    cols = int(np.sqrt(n_features))
+    if cols ** 2 < n_features:
+        rows = cols + 1
+    else:
+        rows = cols
+    fig, axis = plt.subplots(rows, cols, figsize=(15, 5))
+    if isinstance(axis, np.ndarray) is False:
+        axis = np.array([axis])
+    for i, ax in enumerate(axis.ravel()):
+        hist, bin_edges = np.histogram(x_sampled[:, i], bins=100, weights=weights)
+        bins = (bin_edges[:-1] + bin_edges[1:]) * 0.5
+        width = bin_edges[0] - bin_edges[1]
+        if normalize:
+            hist = hist / np.max(hist)
+        ax.bar(bins, hist, width=width)
+        if x_explain is not None:
+            ax.axvline(x_explain[0, i], ymin=0, ymax=1, c='black')
+        mean = np.mean(x_sampled[:, i])
+        ax.axvline(mean, ymin=0, ymax=1, c='gray')
+        ax.set_title(f'{mean} +- {np.std(x_sampled[:, i])}')
+    fig.tight_layout(pad=2.0)
+    return fig, axis

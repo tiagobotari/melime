@@ -6,7 +6,8 @@ from scipy.stats import multivariate_normal
 from sklearn import metrics
 
 from melime.explainers.local_models.local_model_statistics import BasicStatistics
-from melime.explainers.local_models.local_model_linear import RidgeMod, HuberRegressorMod, SGDRegressorMod
+from melime.explainers.local_models.local_model_linear import RidgeMod,\
+    HuberRegressorMod, SGDRegressorMod, BayesianRidgeMod, ARDRegressionMod, Stat
 from melime.explainers.local_models.local_model_tree import Tree
 
 standard_local_models = {
@@ -15,6 +16,9 @@ standard_local_models = {
     "Ridge": RidgeMod,
     "HuberRegressor": HuberRegressorMod,
     "Tree": Tree,
+    "BayesianRidge": BayesianRidgeMod,
+    "ARDRegression": ARDRegressionMod,
+    "Stat": Stat,
 }
 
 standard_weight_kernel = ["gaussian"]
@@ -88,6 +92,7 @@ class Explainer:
         test_batch=False,
         scale_data=False,
         include_x_explain_train=True,
+        generator_parameters=None
     ):
         """
         Generate an explanation for an instance from a ML model.
@@ -99,6 +104,9 @@ class Explainer:
         :param local_mini_batch_max: max number of local-mini-batch to generate the linear model
         :return: explanation in a dict with importance, see status
         """
+        if generator_parameters is None:
+            generator_parameters = {}
+
         if self.generator.transformer:
             chi_explain = self.generator.transform(x_explain)
         else:
@@ -109,7 +117,8 @@ class Explainer:
             self.weight_kernel = None
         elif isinstance(weight_kernel, str):
             if weight_kernel == "gaussian":
-                self.weight_kernel = multivariate_normal(mean=chi_explain[0], cov=0.5 * r ** 2.0).pdf
+                f = multivariate_normal(mean=chi_explain[0], cov=(1.0 * r) ** 2.0).pdf
+                self.weight_kernel = lambda z: np.sqrt(f(z) / f(chi_explain[0]))
             else:
                 raise Exception(
                     f"weight_kernel should be in the list {' '.join(standard_weight_kernel):}. "
@@ -121,16 +130,17 @@ class Explainer:
         diff_importance = None
         error_local_model = None
 
-        y_p_explain = self.model_predict(x_explain)
-        if len(y_p_explain.shape) == 2:
-            y_p_explain = y_p_explain[0][class_index]
+        y_explain = self.model_predict(x_explain)
+
+        if len(y_explain.shape) == 2:
+            y_explain = y_explain[0][class_index]
         else:
-            y_p_explain = y_p_explain[0]
+            y_explain = y_explain[0]
 
         self.local_model = self.local_algorithm(
             x_explain,
             chi_explain,
-            y_p_explain,
+            y_explain,
             feature_names=self.feature_names,
             target_names=self.target_names,
             class_index=class_index,
@@ -144,15 +154,18 @@ class Explainer:
         self.generator.generated_data = None
 
         if test_batch:
-            x_test_set = self.generator.sample_radius(x_explain, r=r, n_samples=n_samples)
+            x_test_set = self.generator.sample_radius(
+                x_explain, r=r, n_samples=n_samples, **generator_parameters)
             chi_test_set = self.transformer(x_test_set)
             y_test_set = self.model_predict(x_test_set)
 
         for step in range(local_mini_batch_max):
             if self.generator.transformer:
-                x_set, chi_set = self.generator.sample_radius(x_explain, r=r, n_samples=n_samples)
+                x_set, chi_set = self.generator.sample_radius(
+                    x_explain, r=r, n_samples=n_samples, **generator_parameters)
             else:
-                x_set = self.generator.sample_radius(x_explain, r=r, n_samples=n_samples)
+                x_set = self.generator.sample_radius(
+                    x_explain, r=r, n_samples=n_samples, **generator_parameters)
                 chi_set = self.transformer(x_set)
 
             if x_set is None:
@@ -196,10 +209,10 @@ class Explainer:
             )
         return self.local_model, con_fav_samples
 
-    def calc_error(self, chi_set, y_set):
-        y_p_test_set = self.local_model.model.predict(chi_test_set)
-        v1 = metrics.explained_variance_score(y_test_set, y_p_test_set, sample_weight=weight_set)
-        v2 = metrics.mean_squared_error(y_test_set, y_p_test_set, sample_weight=weight_set)
+    def calc_error(self, chi_set, y_set, weight_set):
+        y_p_test_set = self.local_model.model.predict(chi_set)
+        v1 = metrics.explained_variance_score(y_set, y_p_test_set, sample_weight=weight_set)
+        v2 = metrics.mean_squared_error(y_set, y_p_test_set, sample_weight=weight_set)
         return v1, v2
 
     def plot_convergence(self, x_set, y_p, diff_importance, error_local_model):

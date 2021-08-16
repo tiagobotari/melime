@@ -4,6 +4,7 @@ import copy
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
+
 class LocalModelBase(ABC):
     """
     Base class to implement the local models.
@@ -13,7 +14,7 @@ class LocalModelBase(ABC):
         self,
         x_explain,
         chi_explain,
-        y_p_explain,
+        y_explain,
         feature_names,
         target_names,
         class_index,
@@ -25,7 +26,7 @@ class LocalModelBase(ABC):
     ):
         self.x_explain = x_explain
         self.chi_explain = chi_explain
-        self.y_p_explain = y_p_explain
+        self.y_explain = y_explain
         self.feature_names = feature_names
         self.target_names = target_names
         self.class_index = class_index
@@ -34,7 +35,8 @@ class LocalModelBase(ABC):
         self.previous_convergence = None
         self.n_previous_convergence = None
         self.convergence_diffs = []
-        self.erros_training = []
+        self.errors_instance_explain = []
+        self.errors_training = []
         self.r = r
         # Samples
         self.save_samples = save_samples
@@ -54,18 +56,29 @@ class LocalModelBase(ABC):
             self.scaler = IdentityScaler()
 
     def measure_convergence(self, chi_set, y_true):
-        y_p_local_model = self.model.predict(chi_set)
+        y_p_local_model = self.predict(chi_set)
+
         # Difference of the importance.
         diff = self.measure_importances()
+
         # Error specific for the local model.
         error = self.measure_errors(y_true, y_p_local_model)
-        self.erros_training.append(error)
+        self.errors_training.append(error)
+
+        # Error at the instance to be explained.
+        y_p_local_instance = self.predict(self.chi_explain)
+        error_instance = self.measure_errors([self.y_explain], y_p_local_instance)
+        self.errors_instance_explain.append(error_instance)
+
         # Samples Min/Max
         self.min_max_predictions(y_p_local_model, y_p_black_box_model=y_true)
+
         # Test convergence.
         if diff is None:
             self.convergence = False
+        # elif error <= self.tol_error and error_instance <= self.tol_error and diff < self.tol_importance:
         elif error <= self.tol_error and diff < self.tol_importance:
+            # TODO: the tol_error used for explain is the same for the set.
             self.convergence = True
         else:
             self.convergence = False
@@ -151,13 +164,13 @@ class LocalModelBase(ABC):
         explanation["x_names"] = x_explain
         explanation["x_values"] = x_explain
         
-        explanation["y_p"] = self.y_p_explain
+        explanation["y_p"] = self.y_explain
         explanation["y_p_max"] = self.y_p_max
         explanation["y_p_min"] = self.y_p_min
         explanation["y_p_local_model"] = y_p
         explanation["y_p_local_model_max"] = self.y_p_local_model_max
         explanation["y_p_local_model_min"] = self.y_p_local_model_min
-        explanation["error"] = self.erros_training[-1]
+        explanation["error"] = self.errors_training[-1]
 
         explanation["importances"] = self.importance
         explanation["diff_convergence_importances"] = self.convergence_diffs[-1]

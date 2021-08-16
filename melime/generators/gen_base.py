@@ -21,7 +21,7 @@ class GenBase(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def sample_radius(self, x_exp, r=None, n_samples=1, random_state=None):
+    def sample_radius(self, x_exp, r=None, n_samples=1, random_state=None, *args, **kwargs):
         """
         Sample data from the manifold/density at the locality of x_exp, a metric should be given.
         :param x_exp: array with point/instance where the neighborhood will be selected.
@@ -29,12 +29,12 @@ class GenBase(ABC):
         """
         raise NotImplementedError
 
-    @abstractmethod
-    def sample(self, n_samples=1, random_state=None):
-        """
-        Sample data from the manifold/density.
-        :param n_samples:
-        :param random_state:
-        :return: array with sampled data.
-        """
-        raise NotImplementedError
+    # @abstractmethod
+    # def sample(self, n_samples=1, random_state=None):
+    #     """
+    #     Sample data from the manifold/density.
+    #     :param n_samples:
+    #     :param random_state:
+    #     :return: array with sampled data.
+    #     """
+    #     raise NotImplementedError
