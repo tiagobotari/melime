@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 if __name__ == "__main__":
     setup(
         name="melime",
-        version="0.1",
+        version="0.2",
         author="Tiago Botari, Frederik Hvilshøj",
         url="https://github.com/tiagobotari/melime/",
         author_email="",
