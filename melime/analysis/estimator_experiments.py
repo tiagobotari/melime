@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 
 from melime.generators.kde_gen import KDEGen
 
+
 # TODO: remover += for list and use append. profile python to find slow parts
 def config_matplotlib():
     font_size = 10
@@ -73,8 +74,8 @@ def create_estimators(
         n_samples=100000, verbose=0,
         # vec_bandwidth=None
         vec_r_fraction=False
-
 ):
+    # TODO: Maybe I am not using this function.
     estimators = []
     for r in np.arange(r_initial, r_final + r_delta, r_delta):
         if verbose:

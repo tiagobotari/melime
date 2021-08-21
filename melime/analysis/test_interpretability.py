@@ -57,12 +57,18 @@ def set_up_test_interpretability_methods(
         else:
             predict_proba = lambda x: model_predict(x)
         estimators = []
-        x = generator.sample_radius(
-            x_explain, r=vec_r, n_samples=n_samples, include_explain=True)
+        # x = generator.sample_radius(
+        #     x_explain, r=vec_r, n_samples=n_samples, include_explain=True)
+        # y = predict_proba(x).reshape(-1)
+        # weights = generator.weights(x_explain, x, vec_r)
+        # estimator0 = Estimator(
+        #     x_explain, x, y, r=vec_r, weights=weights, method='histogram', parameters={'bins': bins})
 
-        weights = generator.weights(x_explain, x, vec_r)
-        estimator0 = Estimator(
-            x_explain, x, predict_proba, r=vec_r, weights=weights, method='histogram', parameters={'bins': bins})
+        estimator0 = create_estimator(
+            x_explain, generator, predict_proba, r=vec_r[0], r_vec_idx=0, vec_r=vec_r, n_samples=n_samples
+            , bins=bins
+        )
+
         estimators.append(estimator0)
         for col in range(x_explain.shape[1]):
             estimators += [create_estimator(

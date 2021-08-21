@@ -1,10 +1,12 @@
 import warnings
 from collections import defaultdict
+from typing import Union, List
 
 import numpy as np
 from scipy.stats import multivariate_normal
 from sklearn import metrics
 
+from melime.explainers.local_models.local_model_base import LocalModelBase
 from melime.explainers.local_models.local_model_statistics import BasicStatistics
 from melime.explainers.local_models.local_model_linear import RidgeMod,\
     HuberRegressorMod, SGDRegressorMod, BayesianRidgeMod, ARDRegressionMod, Stat
@@ -33,9 +35,9 @@ class Explainer:
         self,
         model_predict,
         generator,
-        local_model="BasicStatistics",
+        local_model="Ridge",
         feature_names=None,
-        target_names=["target"],
+        target_names: Union[None, List[str]] = None,
         transformer=None,
         random_state=None,
         verbose=False,
@@ -50,15 +52,16 @@ class Explainer:
         :param random_state: seed for random condition.
         :param verbose: bool to control if information will be printed on screen.
         """
+        self.weight_kernel = None
         self.feature_names = feature_names
-        self.target_names = target_names
+        self.target_names = target_names or ["target"]
         self.model_predict = model_predict
         self.generator = generator
         self.random_state = random_state
         if transformer is None:
             self.transformer = transformer_identity
         self.verbose = verbose
-
+        self.local_algorithm: Union[LocalModelBase, str] = "BasicStatistics"
         if isinstance(local_model, str):
             self.local_model_name = local_model
             if local_model in standard_local_models:
@@ -87,6 +90,7 @@ class Explainer:
         n_samples=500,
         tol_importance=0.001,
         tol_error=0.001,
+        tol_error_instance=None,
         local_mini_batch_max=100,
         weight_kernel=None,
         test_batch=False,
@@ -100,8 +104,15 @@ class Explainer:
         :param r: radius of the ball of the neighborhood
         :param class_index: class which an explanation will be created
         :param n_samples: number of samples for each epochs
-        :param tol: tolerance of the change in the importance
+        :param tol_importance: maximum difference between two consecutive importance calculation
+        :param tol_error: maximum accepted difference for local model and ml model prediction
+        :param tol_error_instance: maximum accepted error for the local model for the x_explain prediction
         :param local_mini_batch_max: max number of local-mini-batch to generate the linear model
+        :param weight_kernel: kernel used as envelope function used for sample strategy
+        :param test_batch: create a test batch to measure errors during the local model training
+        :param scale_data: scale data
+        :param include_x_explain_train: include the x_explain in the perturbed instances
+        :param generator_parameters: extra parameters to be passed to generator
         :return: explanation in a dict with importance, see status
         """
         if generator_parameters is None:
@@ -147,9 +158,9 @@ class Explainer:
             r=r,
             tol_importance=tol_importance,
             tol_error=tol_error,
+            tol_error_instance=tol_error_instance,
             scale_data=scale_data,
         )
-        stats = {}
         con_fav_samples = ContrafactualExaples()
         self.generator.generated_data = None
 

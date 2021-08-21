@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 from sklearn import metrics
 from sklearn.linear_model import SGDRegressor, Ridge, HuberRegressor, BayesianRidge, ARDRegression
@@ -24,6 +26,7 @@ class LocalModelLinear(LocalModelBase):
             r,
             tol_importance=0.001,
             tol_error=None,
+            tol_error_instance=None,
             scale_data=False,
             save_samples=False,
     ):
@@ -37,6 +40,7 @@ class LocalModelLinear(LocalModelBase):
             r,
             tol_importance,
             tol_error,
+            tol_error_instance,
             scale_data,
             save_samples,
         )
@@ -70,6 +74,7 @@ class Stat(LocalModelLinear):
             r,
             tol_importance=0.001,
             tol_error=0.001,
+            tol_error_instance=None,
             scale_data=False,
             save_samples=True,
     ):
@@ -83,6 +88,7 @@ class Stat(LocalModelLinear):
             r,
             tol_importance,
             tol_error,
+            tol_error_instance,
             scale_data,
             save_samples,
         )
@@ -121,6 +127,7 @@ class SGDRegressorMod(LocalModelLinear):
             r,
             tol_importance=0.001,
             tol_error=0.001,
+            tol_error_instance=None,
             scale_data=False,
             save_samples=False,
             grid_search=False,
@@ -144,6 +151,7 @@ class SGDRegressorMod(LocalModelLinear):
             r,
             tol_importance,
             tol_error,
+            tol_error_instance,
             scale_data,
             save_samples,
         )
@@ -151,7 +159,7 @@ class SGDRegressorMod(LocalModelLinear):
             l1_ratio=l1_ratio,
             alpha=0.001,
             max_iter=max_iter,
-            tol=1.0e-3,
+            tol=tol,
             learning_rate=learning_rate,
             eta0=eta0,
             n_iter_no_change=n_iter_no_change,
@@ -168,14 +176,15 @@ class SGDRegressorMod(LocalModelLinear):
         x_set = self.scaler.transform(x_set)
 
         if self.grid_search:
+            warnings.warn("Grid Search Not implemented!!")
             self.grid_search = False
             parameters = {
                 "alpha": 10.0 ** (-np.arange(2, 7)),
                 "eta0": 1,
                 "loss": ["squared_loss", "huber", "epsilon_insensitive"],
             }
-            grid_search = GridSearchCV(model, parameters, n_jobs=-1)
-            grid_search.fit(x_train, y_train)
+            # grid_search = GridSearchCV(model, parameters, n_jobs=-1)
+            # grid_search.fit(x_set, y_set)
         self.model.partial_fit(x_set, y_set, sample_weight=weight_set)
         # self.model.fit(x_set, y_set, sample_weight=weight_set)
 
@@ -192,6 +201,7 @@ class RidgeMod(LocalModelLinear):
             r,
             tol_importance=0.001,
             tol_error=0.001,
+            tol_error_instance=None,
             scale_data=False,
             save_samples=True,
     ):
@@ -205,6 +215,7 @@ class RidgeMod(LocalModelLinear):
             r,
             tol_importance,
             tol_error,
+            tol_error_instance,
             scale_data,
             save_samples,
         )
@@ -238,6 +249,7 @@ class HuberRegressorMod(LocalModelLinear):
             r,
             tol_importance=0.001,
             tol_error=0.001,
+            tol_error_instance=None,
             scale_data=False,
             save_samples=False,
     ):
@@ -251,6 +263,7 @@ class HuberRegressorMod(LocalModelLinear):
             r,
             tol_importance,
             tol_error,
+            tol_error_instance,
             scale_data,
             save_samples,
         )
@@ -278,6 +291,7 @@ class ARDRegressionMod(LocalModelLinear):
             r,
             tol_importance=0.001,
             tol_error=0.001,
+            tol_error_instance=None,
             scale_data=False,
             save_samples=True,
     ):
@@ -291,6 +305,7 @@ class ARDRegressionMod(LocalModelLinear):
             r,
             tol_importance,
             tol_error,
+            tol_error_instance,
             scale_data,
             save_samples,
         )
@@ -303,7 +318,7 @@ class ARDRegressionMod(LocalModelLinear):
         super().partial_fit(x_set, y_set, weight_set)
         self.scaler.fit(self.x_samples)
         x_set = self.scaler.transform(self.x_samples)
-        self.model.fit(x_set, self.y_samples) #, sample_weight=self.weight_samples)
+        self.model.fit(x_set, self.y_samples)  # , sample_weight=self.weight_samples)
 
 
 class BayesianRidgeMod(LocalModelLinear):
@@ -318,6 +333,7 @@ class BayesianRidgeMod(LocalModelLinear):
             r,
             tol_importance=0.001,
             tol_error=0.001,
+            tol_error_instance=None,
             scale_data=False,
             save_samples=True,
     ):
@@ -331,6 +347,7 @@ class BayesianRidgeMod(LocalModelLinear):
             r,
             tol_importance,
             tol_error,
+            tol_error_instance,
             scale_data,
             save_samples,
         )

@@ -57,17 +57,18 @@ class GeneratorPerturbations:
 
 class Estimator:
 
-    def __init__(self, x_explain, x_sampled, predict_proba, r, weights=None, method='histogram', parameters={}):
+    def __init__(self, x_explain, x_sampled, y_sample, r, weights=None, method='histogram', parameters={}):
         self.r = r
         self.n_samples = x_sampled.shape[0]
         self.x_explain = x_explain
-        self.predict_proba = predict_proba
+        # self.predict_proba = predict_proba
         self.method = method
         if self.n_samples == 0:
             self.y = []
             self.success = False
         else:
-            self.y = self.predict_proba(x_sampled).reshape(-1)
+            # self.y = self.predict_proba(x_sampled).reshape(-1)
+            self.y = y_sample
             self.x_sampled = x_sampled
             self.weights = weights
             self.success = True
@@ -118,12 +119,6 @@ class Estimator:
         # Estimate the probability from y
         p, bins = np.histogram(x, bins=bins, density=True, weights=weights)
         return p, bins
-
-    def predict_proba(self, x_sampled):
-        y = self.predict_proba(x_sampled)
-        if y.shape[1] != 1:
-            raise ValueError("Shape should be 1D")
-        return y
 
     def entropy(self):
         if self.method == 'kde':
@@ -191,11 +186,11 @@ def create_estimator(x_explain, generator, predict_proba, r, r_vec_idx, vec_r,
 
     x = generator.sample_radius(
         x_explain, r=vec_r1, n_samples=n_samples, include_explain=True)
-
+    y = predict_proba(x).reshape(-1)
     weights = generator.weights(x_explain, x, vec_r1)
 
     return Estimator(
-        x_explain, x, predict_proba, r, weights=weights, method='histogram', parameters={'bins': bins})
+        x_explain, x, y_sample=y, r=vec_r1, weights=weights, method='histogram', parameters={'bins': bins})
 
 
 # Test GeneratorPerturbations
