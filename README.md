@@ -119,4 +119,6 @@ If you want to output a pdf, then prepend the command as follows:
 > PLOTFILENAME="output.pdf" python melime/experiments/ex_mnist_cnn_innvestigate.py
 ```
 
+# Acknowledgments
 
+T.B. acknowledges support by Grants 2017/06161-7 and 2019/26617-0, São Paulo Research Foundation (FAPESP).
