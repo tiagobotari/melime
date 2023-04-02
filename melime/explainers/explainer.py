@@ -182,7 +182,7 @@ class Explainer:
                 y_p = y_p[:, class_index]
             self.local_model.partial_fit(chi_set, y_p, weight_set)
             if test_batch:
-                self.calc_error(chi_test_set, y_test_set)
+                self.calc_error(chi_test_set, y_test_set, weight_set)
             diff_importance, error_local_model, converged_lc = self.local_model.measure_convergence(chi_set, y_p)
             con_fav_samples.insert_many(x_set, y_p)
             # self.plot_convergence(x_set, y_p, diff_importance, error_local_model)
@@ -203,10 +203,10 @@ class Explainer:
             )
         return self.local_model, con_fav_samples
 
-    def calc_error(self, chi_set, y_set):
-        y_p_test_set = self.local_model.model.predict(chi_test_set)
-        v1 = metrics.explained_variance_score(y_test_set, y_p_test_set, sample_weight=weight_set)
-        v2 = metrics.mean_squared_error(y_test_set, y_p_test_set, sample_weight=weight_set)
+    def calc_error(self, chi_set, y_set, weight_set):
+        y_p_test_set = self.local_model.model.predict(chi_set)
+        v1 = metrics.explained_variance_score(y_set, y_p_test_set, sample_weight=weight_set)
+        v2 = metrics.mean_squared_error(y_set, y_p_test_set, sample_weight=weight_set)
         return v1, v2
 
     def plot_convergence(self, x_set, y_p, diff_importance, error_local_model):
