@@ -148,6 +148,10 @@ class Explainer:
             chi_test_set = self.transformer(x_test_set)
             y_test_set = self.model_predict(x_test_set)
 
+        ## iteration count = `local_mini_batch_max`
+        ## for iteration count times, generate data from generator function
+        ## and test the convergence of surrogate model to see 
+        ## whether it achieved the local model error and some other statistics, equation 2 in article
         for step in range(local_mini_batch_max):
             if self.generator.transformer:
                 x_set, chi_set = self.generator.sample_radius(x_explain, r=r, n_samples=n_samples)
@@ -172,6 +176,7 @@ class Explainer:
             else:
                 weight_set = None
 
+            ## y_p is the prediction of the generated data (x_set)
             y_p = self.model_predict(x_set.reshape([-1] + shape_input))
             if len(y_p.shape) != 1:
                 y_p = y_p[:, class_index]
@@ -188,6 +193,8 @@ class Explainer:
                 print("\t", diff_importance, error_local_model)
             if converged_lc:
                 break
+        ## if the convergence criteria wasn't achieved after a loop with iteration count of `local_mini_batch_max`
+        ## then print that it wasn't converged
         if not self.local_model.convergence:
             warnings.warn(
                 "Convergence tolerance (tol) was not achieved!\n"
