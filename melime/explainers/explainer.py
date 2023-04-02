@@ -148,6 +148,10 @@ class Explainer:
             chi_test_set = self.transformer(x_test_set)
             y_test_set = self.model_predict(x_test_set)
 
+        ## iteration count = `local_mini_batch_max`
+        ## for iteration count times, generate data from generator function
+        ## and test the convergence of surrogate model to see 
+        ## whether it achieved the local model error and some other statistics, equation 2 in article
         for step in range(local_mini_batch_max):
             if self.generator.transformer:
                 x_set, chi_set = self.generator.sample_radius(x_explain, r=r, n_samples=n_samples)
@@ -172,12 +176,13 @@ class Explainer:
             else:
                 weight_set = None
 
+            ## y_p is the prediction of the generated data (x_set)
             y_p = self.model_predict(x_set.reshape([-1] + shape_input))
             if len(y_p.shape) != 1:
                 y_p = y_p[:, class_index]
             self.local_model.partial_fit(chi_set, y_p, weight_set)
             if test_batch:
-                self.calc_error(chi_test_set, y_test_set)
+                self.calc_error(chi_test_set, y_test_set, weight_set)
             diff_importance, error_local_model, converged_lc = self.local_model.measure_convergence(chi_set, y_p)
             con_fav_samples.insert_many(x_set, y_p)
             # self.plot_convergence(x_set, y_p, diff_importance, error_local_model)
@@ -188,6 +193,8 @@ class Explainer:
                 print("\t", diff_importance, error_local_model)
             if converged_lc:
                 break
+        ## if the convergence criteria wasn't achieved after a loop with iteration count of `local_mini_batch_max`
+        ## then print that it wasn't converged
         if not self.local_model.convergence:
             warnings.warn(
                 "Convergence tolerance (tol) was not achieved!\n"
@@ -196,10 +203,10 @@ class Explainer:
             )
         return self.local_model, con_fav_samples
 
-    def calc_error(self, chi_set, y_set):
-        y_p_test_set = self.local_model.model.predict(chi_test_set)
-        v1 = metrics.explained_variance_score(y_test_set, y_p_test_set, sample_weight=weight_set)
-        v2 = metrics.mean_squared_error(y_test_set, y_p_test_set, sample_weight=weight_set)
+    def calc_error(self, chi_set, y_set, weight_set):
+        y_p_test_set = self.local_model.model.predict(chi_set)
+        v1 = metrics.explained_variance_score(y_set, y_p_test_set, sample_weight=weight_set)
+        v2 = metrics.mean_squared_error(y_set, y_p_test_set, sample_weight=weight_set)
         return v1, v2
 
     def plot_convergence(self, x_set, y_p, diff_importance, error_local_model):
