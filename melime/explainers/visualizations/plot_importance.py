@@ -112,6 +112,7 @@ class ExplainGraph(object):
         y_p = explanation["y_p"]
         y_local_model = explanation["y_p_local_model"]
         y_p_max = explanation["y_p_max"]
+
         y_p_min = explanation["y_p_min"]
 
         n_importance = len(importances)
@@ -165,6 +166,8 @@ class ExplainGraph(object):
         #     color="black",
         #     horizontalalignment="right",
         # )
+        print(class_names)
+        print(ax_target, y_p, y_p_min, y_p_max, y_local_model, class_names[0])
         ax_target = cls.plot_predictions(ax_target, y_p, y_p_min, y_p_max, y_local_model, y_name=class_names[0])
 
         # Features plot.
@@ -258,7 +261,7 @@ class ExplainGraph(object):
             y_local_model = explanation["y_p_local_model"]
             y_p_max = explanation["y_p_max"]
             y_p_min = explanation["y_p_min"]
-
+        print(y_p)
         ax.axvline(x=y_p, ymin=0, ymax=1, color="tab:green", linewidth=4, label=f"Model Prediction: {y_p:5.4f}")
         ax.axvline(x=y_p_min, ymin=0, ymax=1, color="black", linewidth=3, linestyle=":")
         if y_local_model:
@@ -318,8 +321,8 @@ class ExplainGraph(object):
         axis[0].plot(x[:], y[:])
         axis[0].set_ylabel("Difference - Importance")
         axis[0].set_xlabel("Steps")
-        x = range(1, len(explanation.erros_training) + 1)
-        y = explanation.erros_training
+        x = range(1, len(explanation.errors_training) + 1)
+        y = explanation.errors_training
         axis[1].scatter(x[:], y[:])
         axis[1].plot(x[:], y[:])
         axis[1].set_ylabel("Errors")

@@ -1,8 +1,9 @@
+import copy
 from abc import ABC, abstractmethod
 
-import copy
 import numpy as np
 from sklearn.preprocessing import StandardScaler
+
 
 class LocalModelBase(ABC):
     """
@@ -10,31 +11,37 @@ class LocalModelBase(ABC):
     """
 
     def __init__(
-        self,
-        x_explain,
-        chi_explain,
-        y_p_explain,
-        feature_names,
-        target_names,
-        class_index,
-        r,
-        tol_importance,
-        tol_error,
-        scale_data=False,
-        save_samples=False,
+            self,
+            x_explain,
+            chi_explain,
+            y_explain,
+            feature_names,
+            target_names,
+            class_index,
+            r,
+            tol_importance,
+            tol_error,
+            tol_error_instance=None,
+            scale_data=False,
+            save_samples=False,
     ):
         self.x_explain = x_explain
         self.chi_explain = chi_explain
-        self.y_p_explain = y_p_explain
+        self.y_explain = y_explain
         self.feature_names = feature_names
         self.target_names = target_names
         self.class_index = class_index
         self.tol_importance = tol_importance
         self.tol_error = tol_error
+        if tol_error_instance is None:
+            self.tol_error_instance = tol_error
+        else:
+            self.tol_error_instance = tol_error_instance
         self.previous_convergence = None
         self.n_previous_convergence = None
         self.convergence_diffs = []
-        self.erros_training = []
+        self.errors_instance_explain = []
+        self.errors_training = []
         self.r = r
         # Samples
         self.save_samples = save_samples
@@ -54,22 +61,32 @@ class LocalModelBase(ABC):
             self.scaler = IdentityScaler()
 
     def measure_convergence(self, chi_set, y_true):
-        y_p_local_model = self.model.predict(chi_set)
+        y_p_local_model = self.predict(chi_set)
+
         # Difference of the importance.
-        diff = self.measure_importances()
+        diff_importance = self.measure_importances()
+
         # Error specific for the local model.
-        error = self.measure_errors(y_true, y_p_local_model)
-        self.erros_training.append(error)
+        errors_local_prediction = self.measure_errors(y_true, y_p_local_model)
+        self.errors_training.append(errors_local_prediction)
+
+        # Error at the instance to be explained.
+        y_p_local_instance = self.predict(self.chi_explain)
+        error_local_prediction_instance = self.measure_errors([self.y_explain], y_p_local_instance)
+        self.errors_instance_explain.append(error_local_prediction_instance)
+
         # Samples Min/Max
         self.min_max_predictions(y_p_local_model, y_p_black_box_model=y_true)
+
         # Test convergence.
-        if diff is None:
+        if diff_importance is None:
             self.convergence = False
-        elif error <= self.tol_error and diff < self.tol_importance:
+        elif errors_local_prediction <= self.tol_error and \
+                error_local_prediction_instance <= self.tol_error_instance and diff_importance < self.tol_importance:
             self.convergence = True
         else:
             self.convergence = False
-        return diff, error, self.convergence
+        return diff_importance, errors_local_prediction, self.convergence
 
     @abstractmethod
     def measure_errors(self, y_true, y_p_local_model):
@@ -150,14 +167,14 @@ class LocalModelBase(ABC):
         # explanation["features"] = chi_explain
         explanation["x_names"] = x_explain
         explanation["x_values"] = x_explain
-        
-        explanation["y_p"] = self.y_p_explain
+
+        explanation["y_p"] = self.y_explain
         explanation["y_p_max"] = self.y_p_max
         explanation["y_p_min"] = self.y_p_min
         explanation["y_p_local_model"] = y_p
         explanation["y_p_local_model_max"] = self.y_p_local_model_max
         explanation["y_p_local_model_min"] = self.y_p_local_model_min
-        explanation["error"] = self.erros_training[-1]
+        explanation["error"] = self.errors_training[-1]
 
         explanation["importances"] = self.importance
         explanation["diff_convergence_importances"] = self.convergence_diffs[-1]
@@ -167,10 +184,10 @@ class LocalModelBase(ABC):
 
 
 class IdentityScaler(StandardScaler):
-    
+
     def transform(self, X, copy=None):
         return X
-    
+
     def fit_transform(self, X, y=None, **fit_params):
         super().fit(X, y=y, **fit_params)
         return X
